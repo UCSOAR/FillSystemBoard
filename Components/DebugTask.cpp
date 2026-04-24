@@ -14,6 +14,7 @@
 
 #include "stm32h7xx_hal.h"
 #include "FlashTask.hpp"
+#include "mx66xx_qspi.hpp"
 
 // External Tasks (to send debug commands to)
 
@@ -23,6 +24,8 @@
 
 /* Constants -----------------------------------------------------------------*/
 constexpr uint8_t DEBUG_TASK_PERIOD = 100;
+constexpr uint32_t FLASH_LOG_SECTOR_INDEX = (FS_TOTAL_SIZE / FS_SECTOR_SIZE) - 2U;
+constexpr uint32_t FLASH_LOG_SECTOR_ADDRESS = FLASH_LOG_SECTOR_INDEX * FS_SECTOR_SIZE;
 extern I2C_HandleTypeDef hi2c2;
 
 /* Variables -----------------------------------------------------------------*/
@@ -178,6 +181,26 @@ void DebugTask::HandleDebugMessage(const char *msg)
   {
     Command cmd(TASK_SPECIFIC_COMMAND, FLASH_DUMP);
     FlashTask::Inst().GetEventQueue()->Send(cmd);
+  }
+  else if (strcmp(msg, "flashlog") == 0)
+  {
+    SOAR_PRINT("Debug: SOAR_PRINT_FLASH test start (flash=%lu bytes, sector=%lu bytes, target sector=%lu, address=0x%08lX)\n",
+               (unsigned long)FS_TOTAL_SIZE,
+               (unsigned long)FS_SECTOR_SIZE,
+               (unsigned long)FLASH_LOG_SECTOR_INDEX,
+               (unsigned long)FLASH_LOG_SECTOR_ADDRESS);
+
+    SOAR_PRINT_FLASH("SOAR_PRINT_FLASH pre-lock write. tick=%lu ms\n",
+                     (unsigned long)TICKS_TO_MS(xTaskGetTickCount()));
+
+    const bool lockOk = cube_flash_log_lock_sector();
+    SOAR_PRINT("Debug: flash log lock %s\n", lockOk ? "OK" : "FAILED");
+
+    SOAR_PRINT_FLASH("SOAR_PRINT_FLASH post-lock write (expected to be blocked)\n");
+
+    const bool blocked = cube_flash_log_test_locked_write();
+    SOAR_PRINT("Debug: flash log locked-write test %s\n",
+               blocked ? "PASS (write blocked as expected)" : "FAIL (write changed while locked)");
   }
   else if (strcmp(msg, "stop_dump") == 0)
   {
