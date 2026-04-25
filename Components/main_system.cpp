@@ -13,8 +13,9 @@
 #include "UARTTask.hpp"
 #include "CubeTask.hpp"
 #include "DebugTask.hpp"
-#include "IMUTask.hpp"
-#include "LSM6DSOTask.hpp"
+#include "Radio/RadioTask.hpp"
+//#include "IMUTask.hpp"
+//#include "LSM6DSOTask.hpp"
 #include "mmc5983Task.hpp"
 #include "BaroTask07.hpp"
 #include "BaroTask11.hpp"
@@ -23,8 +24,10 @@
 
 /* Drivers ------------------------------------------------------------------*/
 namespace Driver {
-    UARTDriver usart8(UART8);
+    UARTDriver uart8(UART8);
     UARTDriver uart7(UART7);
+    UARTDriver usart1(USART1);
+    UARTDriver uart5(UART5);
 }
 
 /* Interface Functions ------------------------------------------------------------*/
@@ -36,15 +39,16 @@ void run_main() {
 	UARTTask::Inst().InitTask();
 	CubeTask::Inst().InitTask();
 	DebugTask::Inst().InitTask();
-	//FlashTask::Inst().InitTask();
+	RadioTask::Inst().InitTask();
+	FlashTask::Inst().InitTask();
 
-	IMUTask::Inst().InitTask();
+	//IMUTask::Inst().InitTask();
 
-	LSM6DSOTask::Inst().InitTask();
-    MMC5983MATask::Inst().InitTask();
-    BaroTask07::Inst().InitTask();
-    BaroTask11::Inst().InitTask();
-    LoggingTask::Inst().InitTask();
+	//LSM6DSOTask::Inst().InitTask();
+    //MMC5983MATask::Inst().InitTask();
+    //BaroTask07::Inst().InitTask();
+    //BaroTask11::Inst().InitTask();
+    //LoggingTask::Inst().InitTask();
 
 
     // Print System Boot Info : Warning, don't queue more than 10 prints before scheduler starts

@@ -1,12 +1,16 @@
 /**
- ******************************************************************************
- * File Name          : DebugTask.cpp
- * Description        : Task for controlling debug input
- ******************************************************************************
+ ********************************************************************************
+ * @file    RadioTask.cpp
+ * @author  spiro
+ * @date    Apr 23, 2026
+ * @brief   Task for controlling radio input
+ ********************************************************************************
  */
 
-/* Includes ------------------------------------------------------------------*/
-#include <SOARDebug/DebugTask.hpp>
+/************************************
+ * INCLUDES
+ ************************************/
+#include "RadioTask.hpp"
 #include "Command.hpp"
 #include "CubeUtils.hpp"
 #include <cstring>
@@ -15,55 +19,56 @@
 #include "stm32h7xx_hal.h"
 #include "FlashTask.hpp"
 
-// External Tasks (to send debug commands to)
-
-/* Macros --------------------------------------------------------------------*/
-
-/* Structs -------------------------------------------------------------------*/
-
-/* Constants -----------------------------------------------------------------*/
-constexpr uint8_t DEBUG_TASK_PERIOD = 100;
+/************************************
+ * PRIVATE MACROS AND DEFINES
+ ************************************/
+constexpr uint8_t RADIO_TASK_PERIOD = 100;
 extern I2C_HandleTypeDef hi2c2;
 
-/* Variables -----------------------------------------------------------------*/
+/************************************
+ * VARIABLES
+ ************************************/
 
-/* Prototypes ----------------------------------------------------------------*/
+/************************************
+ * FUNCTION DECLARATIONS
+ ************************************/
 
-/* Functions -----------------------------------------------------------------*/
+/************************************
+ * FUNCTION DEFINITIONS
+ ************************************/
 /**
  * @brief Constructor, sets all member variables
  */
-DebugTask::DebugTask()
-    : Task(TASK_DEBUG_QUEUE_DEPTH_OBJS), kUart_(DEFAULT_DEBUG_UART_DRIVER)
+RadioTask::RadioTask()
+    : Task(TASK_RADIO_QUEUE_DEPTH_OBJS), kUart_(UART::RADIO)
 {
-  memset(debugBuffer, 0, sizeof(debugBuffer));
-  debugMsgIdx = 0;
-  isDebugMsgReady = false;
+  memset(radioBuffer, 0, sizeof(radioBuffer));
+  radioMsgIdx = 0;
+  isRadioMsgReady = false;
 }
 
 /**
  * @brief Init task for RTOS
  */
-void DebugTask::InitTask()
+void RadioTask::InitTask()
 {
   // Make sure the task is not already initialized
-  SOAR_ASSERT(rtTaskHandle == nullptr, "Cannot initialize Debug task twice");
+  SOAR_ASSERT(rtTaskHandle == nullptr, "Cannot initialize Radio task twice");
 
   // Start the task
   BaseType_t rtValue = xTaskCreate(
-      (TaskFunction_t)DebugTask::RunTask, (const char *)"DebugTask",
-      (uint16_t)TASK_DEBUG_STACK_DEPTH_WORDS, (void *)this,
-      (UBaseType_t)TASK_DEBUG_PRIORITY, (TaskHandle_t *)&rtTaskHandle);
+      (TaskFunction_t)RadioTask::RunTask, (const char *)"RadioTask",
+      (uint16_t)TASK_RADIO_STACK_DEPTH_WORDS, (void *)this,
+      (UBaseType_t)TASK_RADIO_PRIORITY, (TaskHandle_t *)&rtTaskHandle);
 
-  // Ensure creation succeded
-  SOAR_ASSERT(rtValue == pdPASS, "DebugTask::InitTask - xTaskCreate() failed");
+  // Ensure creation succeeded
+  SOAR_ASSERT(rtValue == pdPASS, "RadioTask::InitTask - xTaskCreate() failed");
 }
 
-// TODO: Only run thread when appropriate GPIO pin pulled HIGH (or by define)
 /**
- *    @brief Runcode for the DebugTask
+ * @brief Runcode for the RadioTask
  */
-void DebugTask::Run(void *pvParams)
+void RadioTask::Run(void *pvParams)
 {
   // Arm the interrupt
   ReceiveData();
@@ -77,9 +82,9 @@ void DebugTask::Run(void *pvParams)
 
     // Process the command
     if (cm.GetCommand() == DATA_COMMAND &&
-        cm.GetTaskCommand() == EVENT_DEBUG_RX_COMPLETE)
+        cm.GetTaskCommand() == EVENT_RADIO_RX_COMPLETE)
     {
-      HandleDebugMessage((const char *)debugBuffer);
+      HandleRadioMessage((const char *)radioBuffer);
     }
 
     cm.Reset();
@@ -87,11 +92,13 @@ void DebugTask::Run(void *pvParams)
 }
 
 /**
- * @brief Handles debug messages, assumes msg is null terminated
- * @param msg Message to read, must be null termianted
+ * @brief Handles radio messages, assumes msg is null terminated
+ * @param msg Message to read, must be null terminated
  */
-void DebugTask::HandleDebugMessage(const char *msg)
+void RadioTask::HandleRadioMessage(const char *msg)
 {
+  SOAR_PRINT("%s\r\n", msg);
+
   //-- SYSTEM / CHAR COMMANDS -- (Must be last)
   if (strcmp(msg, "sysreset") == 0)
   {
@@ -105,73 +112,73 @@ void DebugTask::HandleDebugMessage(const char *msg)
     SOAR_PRINT("Current System Free Heap: %d Bytes\n", xPortGetFreeHeapSize());
     SOAR_PRINT("Lowest Ever Free Heap: %d Bytes\n",
                xPortGetMinimumEverFreeHeapSize());
-    SOAR_PRINT("Debug Task Runtime  \t: %d ms\n\n",
+    SOAR_PRINT("Radio Task Runtime \t: %d ms\n\n",
                TICKS_TO_MS(xTaskGetTickCount()));
   }
 //  else if (strcmp(msg, "imu1") == 0)
 //  {
 //
-//    SOAR_PRINT("Debug Imu 32G single sample");
+//    SOAR_PRINT("Radio Imu 32G single sample");
 //    Command cmd(DATA_COMMAND, IMUTask::IMU_SAMPLE_AND_LOG);
 //    IMUTask::Inst().GetEventQueue()->Send(cmd);
 //  }
 //  else if (strcmp(msg, "imu1loop") == 0)
 //  {
 //
-//    SOAR_PRINT("Debug Imu 32G continuous read start");
+//    SOAR_PRINT("Radio Imu 32G continuous read start");
 //    Command cmd(DATA_COMMAND, IMUTask::IMU_START_CONTINUOUS_PRINT);
 //    IMUTask::Inst().GetEventQueue()->Send(cmd);
 //  }
 //  else if (strcmp(msg, "imu1stop") == 0)
 //  {
 //
-//    SOAR_PRINT("Debug Imu 32G continuous read stop");
+//    SOAR_PRINT("Radio Imu 32G continuous read stop");
 //    Command cmd(DATA_COMMAND, IMUTask::IMU_STOP_CONTINUOUS_PRINT);
 //    IMUTask::Inst().GetEventQueue()->Send(cmd);
 //  }
 //  else if (strcmp(msg, "imu2") == 0)
 //  {
 //
-//    SOAR_PRINT("Debug Imu 16G single sample");
+//    SOAR_PRINT("Radio Imu 16G single sample");
 //    Command cmd(DATA_COMMAND, LSM6DSOTask::IMU_SAMPLE_AND_LOG);
 //    LSM6DSOTask::Inst().GetEventQueue()->Send(cmd);
 //  }
 //  else if (strcmp(msg, "imu2loop") == 0)
 //  {
 //
-//    SOAR_PRINT("Debug Imu 16G continuous read start");
+//    SOAR_PRINT("Radio Imu 16G continuous read start");
 //    Command cmd(DATA_COMMAND, LSM6DSOTask::IMU_START_CONTINUOUS_PRINT);
 //    LSM6DSOTask::Inst().GetEventQueue()->Send(cmd);
 //  }
 //  else if (strcmp(msg, "imu2stop") == 0)
 //  {
 //
-//    SOAR_PRINT("Debug Imu 16G continuous read stop");
+//    SOAR_PRINT("Radio Imu 16G continuous read stop");
 //    Command cmd(DATA_COMMAND, LSM6DSOTask::IMU_STOP_CONTINUOUS_PRINT);
 //    LSM6DSOTask::Inst().GetEventQueue()->Send(cmd);
 //  }
 
   else if (strcmp(msg, "baro1") == 0)
   {
-    SOAR_PRINT("Debug Baro07 read");
+    SOAR_PRINT("Radio Baro07 read");
     Command cmd(DATA_COMMAND, BARO07_SAMPLE_AND_LOG);
     BaroTask07::Inst().GetEventQueue()->Send(cmd);
   }
   else if (strcmp(msg, "baro2") == 0)
   {
-    SOAR_PRINT("Debug Baro11 read");
+    SOAR_PRINT("Radio Baro11 read");
     Command cmd(DATA_COMMAND, BARO11_SAMPLE_AND_LOG);
     BaroTask11::Inst().GetEventQueue()->Send(cmd);
   }
   else if (strcmp(msg, "mag") == 0)
   {
-    SOAR_PRINT("Debug mag read");
+    SOAR_PRINT("Radio mag read");
     Command cmd(DATA_COMMAND, MMC5983MATask::MMC_CMD_ENABLE_LOG);
     MMC5983MATask::Inst().GetEventQueue()->Send(cmd);
   }
   else if (strcmp(msg, "flash_test") == 0)
   {
-    SOAR_PRINT("Debug: Triggering flash tests\n");
+    SOAR_PRINT("Radio: Triggering flash tests\n");
     FlashTask::Inst().TriggerTest();
   }
   else if (strcmp(msg, "flash_dump") == 0)
@@ -183,75 +190,67 @@ void DebugTask::HandleDebugMessage(const char *msg)
   {
     LoggingService::StopDump();
   }
-  else if (strncmp(msg, "transmit ", strlen("transmit ")) == 0)
-  {
-      const char* radioMsg = &msg[strlen("transmit ")];
-      UART::RADIO->Transmit((uint8_t*)radioMsg, strlen(radioMsg));
-      UART::RADIO->Transmit((uint8_t*)"\r\n", 2);
-  }
   else if (strcmp(msg, "transmit") == 0)
   {
-      UART::RADIO->Transmit((uint8_t*)"Yo\r\n", 4);
+    UART::RADIO->Transmit((unsigned char *)"Yo", 2);
   }
-
-
   else
   {
     // Single character command, or unknown command
     switch (msg[0])
     {
     default:
-      SOAR_PRINT("Debug, unknown command: %s\n", msg);
+      SOAR_PRINT("Radio, unknown command: %s\n", msg);
       break;
     }
   }
 
   // We've read the data, clear the buffer
-  debugMsgIdx = 0;
-  isDebugMsgReady = false;
+  radioMsgIdx = 0;
+  isRadioMsgReady = false;
 }
 
 /**
  * @brief Receive data, currently receives by arming interrupt
  */
-bool DebugTask::ReceiveData() { return kUart_->ReceiveIT(&debugRxChar, this); }
+bool RadioTask::ReceiveData() { return kUart_->ReceiveIT(&radioRxChar, this); }
 
 /**
  * @brief Receive data to the buffer
- * @return Whether the debugBuffer is ready or not
+ * @return Whether the radioBuffer is ready or not
  */
-void DebugTask::InterruptRxData(uint8_t errors)
+void RadioTask::InterruptRxData(uint8_t errors)
 {
-  // If we already have an unprocessed debug message, ignore this byte
-  if (!isDebugMsgReady)
+  // If we already have an unprocessed radio message, ignore this byte
+  if (!isRadioMsgReady)
   {
     // Check byte for end of message - note if using termite you must turn on
     // append CR
-    if (debugRxChar == '\r' || debugRxChar == '\n' ||
-        debugMsgIdx == DEBUG_RX_BUFFER_SZ_BYTES)
+    if (radioRxChar == '\r' || radioRxChar == '\n' ||
+        radioMsgIdx == RADIO_RX_BUFFER_SZ_BYTES)
     {
-      if (debugMsgIdx > 0)
+      if (radioMsgIdx > 0)
       {
         // Null terminate and process
-        debugBuffer[debugMsgIdx++] = '\0';
-        isDebugMsgReady = true;
+        radioBuffer[radioMsgIdx++] = '\0';
+        isRadioMsgReady = true;
 
-        // Notify the debug task
-        Command cm(DATA_COMMAND, EVENT_DEBUG_RX_COMPLETE);
+        // Notify the radio task
+        Command cm(DATA_COMMAND, EVENT_RADIO_RX_COMPLETE);
         bool res = qEvtQueue->SendFromISR(cm);
 
         // If we failed to send the event, we should reset the buffer, that way
-        // DebugTask doesn't stall
+        // RadioTask doesn't stall
         if (res == false)
         {
-          debugMsgIdx = 0;
-          isDebugMsgReady = false;
+          radioMsgIdx = 0;
+          isRadioMsgReady = false;
         }
       }
     }
     else
     {
-      debugBuffer[debugMsgIdx++] = debugRxChar;
+      radioBuffer[radioMsgIdx++] = radioRxChar;
     }
   }
 
@@ -259,8 +258,6 @@ void DebugTask::InterruptRxData(uint8_t errors)
   ReceiveData();
 }
 
-/* Helper Functions
- * --------------------------------------------------------------*/
 /**
  * @brief Extracts an integer parameter from a string
  * @brief msg Message to extract from, MUST be at least identifierLen long, and
@@ -269,7 +266,7 @@ void DebugTask::InterruptRxData(uint8_t errors)
  * space) is 4
  * @return ERRVAL on failure, otherwise the extracted value
  */
-int32_t DebugTask::ExtractIntParameter(const char *msg,
+int32_t RadioTask::ExtractIntParameter(const char *msg,
                                        uint16_t identifierLen)
 {
   // Handle a command with an int parameter at the end

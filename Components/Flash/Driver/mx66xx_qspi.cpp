@@ -450,8 +450,8 @@ bool MX66xxQSPI_Init(void)
     mx66xx_qspi.SectorCount = FS_TOTAL_SIZE / FS_SECTOR_SIZE;
     mx66xx_qspi.PageCount = FS_TOTAL_SIZE / FS_PAGE_SIZE;
 
-    MX66xxQSPI_ReadUniqID();
-    MX66xxQSPI_ReadStatusRegister();
+    //MX66xxQSPI_ReadUniqID();
+    //MX66xxQSPI_ReadStatusRegister();
 
     mx66xx_qspi.Lock = 0;
     return mx66xx_qspi.Addr4Byte == 1;

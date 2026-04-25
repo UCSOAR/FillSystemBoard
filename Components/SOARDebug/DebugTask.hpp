@@ -11,8 +11,8 @@
 #include "SystemDefines.hpp"
 #include "UARTDriver.hpp"
 #include "DataBroker.hpp"
-#include "IMUTask.hpp"
-#include "LSM6DSOTask.hpp"
+//#include "IMUTask.hpp"
+//#include "LSM6DSOTask.hpp"
 #include "mmc5983Task.hpp"
 #include "BaroTask07.hpp"
 #include "BaroTask11.hpp"
@@ -27,7 +27,7 @@ enum DEBUG_TASK_COMMANDS {
 
 
 /* Macros ------------------------------------------------------------------*/
-constexpr uint16_t DEBUG_RX_BUFFER_SZ_BYTES = 16;
+constexpr uint16_t DEBUG_RX_BUFFER_SZ_BYTES = 128;
 
 /* Class ------------------------------------------------------------------*/
 class DebugTask : public Task, public UARTReceiverBase {
