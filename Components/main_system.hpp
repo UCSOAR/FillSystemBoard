@@ -10,6 +10,7 @@
 
 /* Includes  ----------------------------------------------------------------------------*/
 #include "Mutex.hpp"
+
 // Board specific includes
 #include "stm32h7xx_hal.h"
 #include "stm32h7xx_ll_usart.h"

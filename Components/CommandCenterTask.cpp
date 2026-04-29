@@ -120,20 +120,52 @@ void CommandCenterTask::HandleCommand(Command& cm)
 
 void CommandCenterTask::ExecuteCommand(const char* msg)
 {
+	std::string command(msg);
+	CanAutoNode::UniqueBoardID daus[16] = {0};
+	uint16_t daucount = 0;
+	uint16_t namecount = 0;
+	char names[MAX_NAME_STR_LEN][MAX_NAME_STR_LEN];
+	if(motherboard != nullptr) {
+		daucount = motherboard->GetIDsOfAllBoards(daus,sizeof(daus)/sizeof(CanAutoNode::UniqueBoardID));
+		namecount = motherboard->GetNamesOfAllBoards(names, MAX_NAME_STR_LEN);
+	}
+	activeBoards.assign(daus,daus+daucount);
 
+
+
+
+	if(command.find("gimme update") == 0) {
+
+		if(motherboard == nullptr) {
+			SOAR_PRINT("MOT1:%s\n", "OFF");
+
+		} else {
+			SOAR_PRINT("MOT1:%s\n", "ONL");
+			for (uint16_t i = 0; i < daucount; i++) {
+				SOAR_PRINT("DAU%d:%s\n", i, "ONL");
+				SOAR_PRINT(names[i]);
+				SOAR_PRINT("\n%010lu%010lu%010lu\n",daus[i].u2,daus[i].u1,daus[i].u0);
+			}
+
+		}
+
+		SOAR_PRINT("<ENDBOARDUPDATE>\n");
+		return;
+	}
 	//discover daughterboards while the task is running
 	if(motherboard == nullptr) {
 		return;
 	}
-	CanAutoNode::UniqueBoardID daus[16];
-	motherboard->GetIDsOfAllBoards(daus,sizeof(daus)/sizeof(CanAutoNode::UniqueBoardID));
-	activeBoards.assign(daus,daus+sizeof(daus)/sizeof(CanAutoNode::UniqueBoardID));
+
+
 
 	//parse string to check if there is a start or an end
-	std::string command(msg);
+
 
 	//find which daughterboards are chosen
 	std::vector<CanAutoNode::UniqueBoardID> daughterBoards;
+
+
 
 	// start command
 	if (command.find("start") == 0) {
@@ -145,9 +177,8 @@ void CommandCenterTask::ExecuteCommand(const char* msg)
 			}
 		} else {
 			//if d2, d3 etc gets typed in the commands get sent for those boards
-			char names[MAX_NAME_STR_LEN][MAX_NAME_STR_LEN];
-			uint16_t count = motherboard->GetNamesOfAllBoards(names, MAX_NAME_STR_LEN);
-			for (uint16_t i = 0; i < count; i++) {
+
+			for (uint16_t i = 0; i < namecount; i++) {
 				const char* boardName = names[i];
 				if (command.find(boardName) != std::string::npos) {
 					daughterBoards.push_back(motherboard->GetIDOfBoardWithName(boardName));
