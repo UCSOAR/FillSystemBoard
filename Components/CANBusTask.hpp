@@ -13,6 +13,7 @@
  ************************************/
 #include "Task.hpp"
 #include "SystemDefines.hpp"
+#include "CanAutoNodeMotherboard.hpp"
 
 /************************************
  * MACROS AND DEFINES
@@ -44,7 +45,10 @@ private:
     // Private Functions
     CANBusTask();        // Private constructor
     CANBusTask(const CANBusTask&);                        // Prevent copy-construction
-    CANBusTask& operator=(const CANBusTask&);            // Prevent assignment
+    CANBusTask& operator=(const CANBusTask&); 			// Prevent assignment
+    void CANBusTask::RecieveData();
+
+    CanAutoNodeMotherboard moth;
 };
 
 /************************************

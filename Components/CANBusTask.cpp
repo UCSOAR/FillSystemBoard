@@ -22,13 +22,14 @@
 /************************************
  * INCLUDES
  ************************************/
-#include "${TaskHeaderName}"
+#include "CANBusTask.hpp"
 #include "SystemDefines.hpp"
+
 
 /************************************
  * PRIVATE MACROS AND DEFINES
  ************************************/
-
+extern FDCAN_HandleTypeDef hfdcan1;
 /************************************
  * VARIABLES
  ************************************/
@@ -44,7 +45,7 @@
 /**
  * @brief Constructor for CANBusTask
  */
-CANBusTask::CANBusTask() : Task(${TaskQueueDepthDefinedInSystemDefines})
+CANBusTask::CANBusTask() : Task(TASK_LOGGING_QUEUE_DEPTH_OBJS)
 {
 }
 
@@ -60,12 +61,16 @@ void CANBusTask::InitTask()
     BaseType_t rtValue =
         xTaskCreate((TaskFunction_t)CANBusTask::RunTask,
             (const char*)"CANBusTask",
-            (uint16_t)${TaskStackDepthDefinedInSystemDefines},
+            (uint16_t)${TASK_LOGGING_QUEUE_DEPTH_WORDS},
             (void*)this,
-            (UBaseType_t)${TaskPriorityDefinedInSystemDefines},
+            (UBaseType_t)${TASK_LOGGING_PRIORITY},
             (TaskHandle_t*)&rtTaskHandle);
 
                 SOAR_ASSERT(rtValue == pdPASS, "CANBusTask::InitTask() - xTaskCreate() failed");
+
+    //init canbus these will have to be configured in the ioc
+    moth = {&hfdcan1};
+    HAL_GPIO_WritePin(CAN_Standby_GPIO_Port, CAN_Standby_Pin, GPIO_PIN_RESET);
 }
 
 /**
@@ -75,6 +80,7 @@ void CANBusTask::InitTask()
 void CANBusTask::Run(void * pvParams)
 {
     while (1) {
+    	RecieveData();
         /* Process commands in blocking mode */
         Command cm;
         bool res = qEvtQueue->ReceiveWait(cm);
@@ -99,4 +105,19 @@ void CANBusTask::HandleCommand(Command& cm)
 
     //No matter what we happens, we must reset allocated data
     cm.Reset();
+}
+
+
+void CANBusTask::RecieveData(){
+	moth.CheckCANCommands();
+	CanAutoNode::UniqueBoardID e = moth.GetIDOfBoardWithName("Thermocouple");
+	if (e != CanAutoNode::UniqueBoardID{0,0,0}) {
+
+		uint8_t data[moth.GetSizeOfLogIndexInBoard(e, 0)];
+
+		if(moth.ReadMessageFromDaughterByLogIndex(e, 0, data, sizeof(data))) {
+
+		}
+
+
 }
