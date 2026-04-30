@@ -538,7 +538,18 @@ void LoggingService::ProcessFlashDump()
 
 			}
 			else if(type == LoggingData::LOADCELL){
+			    int32_t  rawCounts_;
+			    int32_t  force_mN_;
+			    int32_t  mass_g_;
 
+			    memcpy(&rawCounts_, sectorBuf + i + 5,  sizeof(int32_t));
+				memcpy(&force_mN_, sectorBuf + i + 9,  sizeof(int32_t));
+				memcpy(&mass_g_, sectorBuf + i + 13, sizeof(int32_t));
+
+
+				SOAR_PRINT("%s Timestamp=%lu rawCounts=%ld Force=%ld mass=%lu\n",
+							SensorTypeName(type), timestamp,
+							(long)rawCounts_, (long)force_mN_, (long)mass_g_);
 			}
 
 		}
