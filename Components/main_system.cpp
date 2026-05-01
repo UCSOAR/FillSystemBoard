@@ -14,7 +14,7 @@
 #include "CubeTask.hpp"
 #include "DebugTask.hpp"
 #include "Radio/RadioTask.hpp"
-#include "FSBProtocol/FSBProtocolTask.hpp"
+#include "FSBProtocolTask.hpp"
 #include "CommandCenterTask.hpp"
 //#include "IMUTask.hpp"
 //#include "LSM6DSOTask.hpp"

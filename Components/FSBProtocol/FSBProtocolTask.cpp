@@ -11,7 +11,8 @@
 #include "UARTTask.hpp"
 
 FSBProtocolTask::FSBProtocolTask()
-    : ProtocolTask(Proto::Node::NODE_UNKNOWN, UART::RADIO, UART_TASK_COMMAND_SEND_RADIO)
+    : ProtocolTask(Proto::Node::NODE_RCU, UART::RADIO, UART_TASK_COMMAND_SEND_RADIO),
+      nextTxSequenceNum(1)
 {
 }
 
@@ -52,19 +53,19 @@ void FSBProtocolTask::HandleProtobufCommandMessage(
     route.commandParam = 0;
 
     switch (route.messageType) {
-    case Proto::CommandMessage::FieldNumber::DMB_COMMAND:
-        route.commandEnum = static_cast<uint32_t>(msg.get_dmb_command().get_command_enum());
+    case Proto::CommandMessage::FieldNumber::FCB_COMMAND:
+        route.commandEnum = static_cast<uint32_t>(msg.get_fcb_command().get_command_enum());
         break;
     case Proto::CommandMessage::FieldNumber::PBB_COMMAND:
         route.commandEnum = static_cast<uint32_t>(msg.get_pbb_command().get_command_enum());
         break;
-    case Proto::CommandMessage::FieldNumber::RCU_COMMAND:
-        route.commandEnum = static_cast<uint32_t>(msg.get_rcu_command().get_command_enum());
-        route.commandParam = msg.get_rcu_command().get_command_param();
+    case Proto::CommandMessage::FieldNumber::FSB_COMMAND:
+        route.commandEnum = static_cast<uint32_t>(msg.get_fsb_command().get_command_enum());
+        route.commandParam = msg.get_fsb_command().get_command_param();
         break;
-    case Proto::CommandMessage::FieldNumber::SOB_COMMAND:
-        route.commandEnum = static_cast<uint32_t>(msg.get_sob_command().get_command_enum());
-        route.commandParam = msg.get_sob_command().get_command_param();
+    case Proto::CommandMessage::FieldNumber::LRB_COMMAND:
+        route.commandEnum = static_cast<uint32_t>(msg.get_lrb_command().get_command_enum());
+        route.commandParam = msg.get_lrb_command().get_command_param();
         break;
     default:
         SOAR_PRINT("FSBProtocolTask: command protobuf has no command payload\n");
@@ -84,6 +85,29 @@ void FSBProtocolTask::HandleProtobufCommandMessage(
         SOAR_PRINT("FSBProtocolTask: failed to queue routed command\n");
         SendNACK(Proto::MessageID::MSG_COMMAND, msg.get_source());
     }
+}
+
+bool FSBProtocolTask::SendFcbRadioCommand(Proto::FcbCommand::Command command, uint32_t sequenceNum)
+{
+    Proto::CommandMessage msg;
+    msg.set_source(Proto::Node::NODE_RCU);
+    msg.set_target(Proto::Node::NODE_DMB);
+    msg.set_source_sequence_num(sequenceNum == 0 ? nextTxSequenceNum++ : sequenceNum);
+    msg.mutable_fcb_command().set_command_enum(command);
+
+    EmbeddedProto::WriteBufferFixedSize<DEFAULT_PROTOCOL_WRITE_BUFFER_SIZE> writeBuffer;
+    const EmbeddedProto::Error err = msg.serialize(writeBuffer);
+    if (EmbeddedProto::Error::NO_ERRORS != err) {
+        SOAR_PRINT("FSBProtocolTask: failed to serialize FCB command [%d]\n",
+            static_cast<uint32_t>(err));
+        return false;
+    }
+
+    SOAR_PRINT("FSBProtocolTask: sending FCB command %lu over radio seq=%lu\n",
+        static_cast<uint32_t>(command),
+        msg.get_source_sequence_num());
+    SendProtobufMessage(writeBuffer, Proto::MessageID::MSG_COMMAND);
+    return true;
 }
 
 void FSBProtocolTask::HandleProtobufControlMesssage(

@@ -21,6 +21,7 @@ public:
     }
 
     void InitTask() override;
+    bool SendFcbRadioCommand(Proto::FcbCommand::Command command, uint32_t sequenceNum = 0);
 
 protected:
     static void RunTask(void* pvParams) { FSBProtocolTask::Inst().Run(pvParams); }
@@ -36,6 +37,8 @@ private:
     FSBProtocolTask();
     FSBProtocolTask(const FSBProtocolTask&);
     FSBProtocolTask& operator=(const FSBProtocolTask&);
+
+    uint32_t nextTxSequenceNum;
 };
 
 #endif /* COMPONENTS_FSBPROTOCOL_FSBPROTOCOLTASK_HPP_ */
