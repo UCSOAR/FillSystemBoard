@@ -46,9 +46,9 @@ private:
     CANBusTask();        // Private constructor
     CANBusTask(const CANBusTask&);                        // Prevent copy-construction
     CANBusTask& operator=(const CANBusTask&); 			// Prevent assignment
-    void CANBusTask::RecieveData();
+    void RecieveData();
 
-    CanAutoNodeMotherboard moth;
+    CanAutoNodeMotherboard *moth = nullptr;
 };
 
 /************************************

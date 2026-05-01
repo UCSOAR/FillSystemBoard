@@ -61,16 +61,16 @@ void CANBusTask::InitTask()
     BaseType_t rtValue =
         xTaskCreate((TaskFunction_t)CANBusTask::RunTask,
             (const char*)"CANBusTask",
-            (uint16_t)${TASK_LOGGING_QUEUE_DEPTH_WORDS},
+            (uint16_t){TASK_LOGGING_QUEUE_DEPTH_WORDS},
             (void*)this,
-            (UBaseType_t)${TASK_LOGGING_PRIORITY},
+            (UBaseType_t){TASK_LOGGING_PRIORITY},
             (TaskHandle_t*)&rtTaskHandle);
 
                 SOAR_ASSERT(rtValue == pdPASS, "CANBusTask::InitTask() - xTaskCreate() failed");
 
     //init canbus these will have to be configured in the ioc
-    moth = {&hfdcan1};
-    HAL_GPIO_WritePin(CAN_Standby_GPIO_Port, CAN_Standby_Pin, GPIO_PIN_RESET);
+    moth = new CanAutoNodeMotherboard{&hfdcan1};
+    //HAL_GPIO_WritePin(CAN_Standby_GPIO_Port, CAN_Standby_Pin, GPIO_PIN_RESET);
 }
 
 /**
@@ -81,12 +81,14 @@ void CANBusTask::Run(void * pvParams)
 {
     while (1) {
     	RecieveData();
+
         /* Process commands in blocking mode */
         Command cm;
-        bool res = qEvtQueue->ReceiveWait(cm);
+        bool res = qEvtQueue->Receive(cm);
         if(res) {
             HandleCommand(cm);
         }
+        HAL_Delay(10);
     }
 }
 
@@ -109,15 +111,21 @@ void CANBusTask::HandleCommand(Command& cm)
 
 
 void CANBusTask::RecieveData(){
-	moth.CheckCANCommands();
-	CanAutoNode::UniqueBoardID e = moth.GetIDOfBoardWithName("Thermocouple");
+	moth->CheckCANCommands();
+	CanAutoNode::UniqueBoardID e = moth->GetIDOfBoardWithName("Thermocouple");
+
+	if (moth->GetTicksSinceLastHeartbeat() > 1000)
+	{
+		moth->Heartbeat();
+	}
+
 	if (e != CanAutoNode::UniqueBoardID{0,0,0}) {
 
-		uint8_t data[moth.GetSizeOfLogIndexInBoard(e, 0)];
+		uint8_t data[moth->GetSizeOfLogIndexInBoard(e, 0)];
 
-		if(moth.ReadMessageFromDaughterByLogIndex(e, 0, data, sizeof(data))) {
+		if(moth->ReadMessageFromDaughterByLogIndex(e, 0, data, sizeof(data))) {
 
 		}
-
+	}
 
 }

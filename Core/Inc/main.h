@@ -83,8 +83,6 @@ void Error_Handler(void);
 #define IMU32_CS_GPIO_Port GPIOC
 #define IMU16_INT_Pin GPIO_PIN_15
 #define IMU16_INT_GPIO_Port GPIOA
-#define IMU16_CS_Pin GPIO_PIN_0
-#define IMU16_CS_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
 
