@@ -20,6 +20,8 @@
 #include "SystemDefines.hpp"
 #include "DebugTask.hpp"
 #include "FSBProtocol/FSBProtocolTypes.hpp"
+#include "CanAutoNode.hpp"
+#include "CanAutoNodeMotherBoard.hpp"
 #include <string>
 #include <algorithm>
 #include <vector>
