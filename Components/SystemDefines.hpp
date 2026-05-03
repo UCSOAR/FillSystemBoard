@@ -39,6 +39,7 @@ enum GLOBAL_COMMANDS : uint8_t
     DATA_COMMAND,// Data command, used to send data to a task. Target is stored in taskCommand
 	DATA_BROKER_COMMAND,
 	GPS_COMMAND,
+	PROTOCOL_COMMAND,
 };
 
 /* Cube++ Optional Code Configuration ------------------------------------------------------------------*/
@@ -56,6 +57,11 @@ constexpr uint16_t UART_TASK_STACK_DEPTH_WORDS = 512;    // Size of the uart tas
 constexpr uint8_t TASK_DEBUG_PRIORITY = 2;            // Priority of the debug task
 constexpr uint8_t TASK_DEBUG_QUEUE_DEPTH_OBJS = 10;        // Size of the debug task queue
 constexpr uint16_t TASK_DEBUG_STACK_DEPTH_WORDS = 512;        // Size of the debug task stack
+
+// COMMAND CENTER TASK
+constexpr uint8_t TASK_COMMANDCENTER_PRIORITY = 2;
+constexpr uint8_t TASK_COMMANDCENTER_QUEUE_DEPTH_OBJS = 10;
+constexpr uint16_t TASK_COMMANDCENTER_STACK_DEPTH_WORDS = 768;
 
 constexpr uint8_t TASK_LOGGING_PRIORITY = 3;
 constexpr uint8_t TASK_LOGGING_QUEUE_DEPTH_OBJS = 10;

@@ -85,6 +85,8 @@ void LoggingTask::InitTask()
 	DataBroker::Subscribe<IMUData>(this);
 	DataBroker::Subscribe<BaroData>(this);
 	DataBroker::Subscribe<MagData>(this);
+	DataBroker::Subscribe<ThermocoupleData>(this);
+	DataBroker::Subscribe<LoadCellData>(this);
 
 }
 
@@ -213,6 +215,54 @@ void LoggingTask::HandleCommand(Command& cm){
 
 		err = log.LogData();
 
+		break;
+	}
+	case DataBrokerMessageTypes::THERMOCOUPLE_DATA:{
+		ThermocoupleData data = DataBroker::ExtractData<ThermocoupleData>(cm);
+
+		// Get timestamp in ms
+		uint32_t timestamp = xTaskGetTickCount() * portTICK_PERIOD_MS;
+
+		memset(buf, 0, 20);
+
+		buf[0] = static_cast<uint8_t>(LoggingData::THERMOCOUPLE);
+
+		memcpy(buf + 1, &timestamp, sizeof(timestamp));
+		memcpy(buf + 5, &data, sizeof(data));
+
+		LoggingService log(
+			LoggingDest::FLASH_EXTERN,
+			LoggingData::THERMOCOUPLE,
+			buf,
+			20,
+			LoggingPriority::SECOND
+			);
+
+		err = log.LogData();
+		break;
+	}
+	case DataBrokerMessageTypes::LOADCELL_DATA:{
+		LoadCellData data = DataBroker::ExtractData<LoadCellData>(cm);
+
+		// Get timestamp in ms
+		uint32_t timestamp = xTaskGetTickCount() * portTICK_PERIOD_MS;
+
+		memset(buf, 0, 20);
+
+		buf[0] = static_cast<uint8_t>(LoggingData::LOADCELL);
+
+		memcpy(buf + 1, &timestamp, sizeof(timestamp));
+		memcpy(buf + 5, &data, sizeof(data));
+
+		LoggingService log(
+			LoggingDest::FLASH_EXTERN,
+			LoggingData::LOADCELL,
+			buf,
+			20,
+			LoggingPriority::SECOND
+			);
+
+		err = log.LogData();
 		break;
 	}
 	case DataBrokerMessageTypes :: INVALID:

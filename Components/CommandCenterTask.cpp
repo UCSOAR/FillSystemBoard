@@ -19,6 +19,7 @@
 #include "CommandCenterTask.hpp"
 #include "SystemDefines.hpp"
 #include "DebugTask.hpp"
+#include "FSBProtocol/FSBProtocolTypes.hpp"
 #include "CanAutoNode.hpp"
 #include "CanAutoNodeMotherBoard.hpp"
 #include <string>
@@ -52,7 +53,9 @@ CommandCenterTask::CommandCenterTask()
 	//activeBoards = CanAutoNode::GetNamesOfAllBoards();
 }
 
+#if COMMAND_CENTER_HAS_CAN_AUTO_NODE
 extern FDCAN_HandleTypeDef hfdcan1;
+#endif
 /**
  * @brief Initialize the CommandCenterTask
  *        Do not modify this function aside from adding the task name
@@ -82,7 +85,9 @@ void CommandCenterTask::InitTask()
 void CommandCenterTask::Run(void * pvParams)
 {
 
+#if COMMAND_CENTER_HAS_CAN_AUTO_NODE
 	motherboard = new CanAutoNodeMotherboard{&hfdcan1};
+#endif
 	while (1) {
 		// Process commands in blocking mode
 		Command cm;
@@ -108,6 +113,25 @@ void CommandCenterTask::HandleCommand(Command& cm)
 			ExecuteCommand((const char*)cm.GetDataPointer());
 		}
 		break;
+	case TASK_SPECIFIC_COMMAND:
+		if (cm.GetTaskCommand() == COMMAND_CENTER_ROUTE_PROTO_COMMAND &&
+			cm.GetDataSize() == sizeof(FSBProtoCommandRoute))
+		{
+			const FSBProtoCommandRoute* route =
+				reinterpret_cast<const FSBProtoCommandRoute*>(cm.GetDataPointer());
+
+			SOAR_PRINT("CommandCenterTask - Proto route src=%lu target=%lu type=%lu cmd=%lu param=%ld seq=%lu\n",
+				static_cast<uint32_t>(route->source),
+				static_cast<uint32_t>(route->target),
+				static_cast<uint32_t>(route->messageType),
+				route->commandEnum,
+				route->commandParam,
+				route->sourceSequenceNum);
+
+			// TODO: Map route->target to the matching daughter board and forward over CAN.
+			// For NODE_ANY, broadcast to every discovered daughter board.
+		}
+		break;
 
 	default:
 		SOAR_PRINT("CommandCenterTask - Received Unsupported Command {%d}\n", cm.GetCommand());
@@ -121,6 +145,7 @@ void CommandCenterTask::HandleCommand(Command& cm)
 void CommandCenterTask::ExecuteCommand(const char* msg)
 {
 
+#if COMMAND_CENTER_HAS_CAN_AUTO_NODE
 	//discover daughterboards while the task is running
 	if(motherboard == nullptr) {
 		return;
@@ -233,4 +258,8 @@ void CommandCenterTask::ExecuteCommand(const char* msg)
 		}
 
 	}
+#else
+	(void)msg;
+	SOAR_PRINT("CommandCenterTask - CAN auto-node routing is unavailable in this checkout\n");
+#endif
 }

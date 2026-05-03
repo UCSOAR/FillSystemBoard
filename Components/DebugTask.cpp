@@ -14,6 +14,7 @@
 
 #include "stm32h7xx_hal.h"
 #include "FlashTask.hpp"
+#include "FSBProtocolTask.hpp"
 
 // External Tasks (to send debug commands to)
 
@@ -192,6 +193,30 @@ void DebugTask::HandleDebugMessage(const char *msg)
   else if (strcmp(msg, "transmit") == 0)
   {
       UART::RADIO->Transmit((uint8_t*)"Yo\r\n", 4);
+  }
+  else if (strncmp(msg, "proto_fcb ", strlen("proto_fcb ")) == 0)
+  {
+      const int32_t command = ExtractIntParameter(msg, strlen("proto_fcb "));
+      if (command != ERRVAL)
+      {
+          FSBProtocolTask::Inst().SendFcbRadioCommand(
+              static_cast<Proto::FcbCommand::Command>(command));
+      }
+  }
+  else if (strcmp(msg, "fcb_abort") == 0)
+  {
+      FSBProtocolTask::Inst().SendFcbRadioCommand(
+          Proto::FcbCommand::Command::RSC_ANY_TO_ABORT);
+  }
+  else if (strcmp(msg, "fcb_open_vent") == 0)
+  {
+      FSBProtocolTask::Inst().SendFcbRadioCommand(
+          Proto::FcbCommand::Command::RSC_OPEN_VENT);
+  }
+  else if (strcmp(msg, "fcb_close_vent") == 0)
+  {
+      FSBProtocolTask::Inst().SendFcbRadioCommand(
+          Proto::FcbCommand::Command::RSC_CLOSE_VENT);
   }
 
 
