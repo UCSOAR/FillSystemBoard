@@ -13,7 +13,8 @@
  ************************************/
 #include "Task.hpp"
 #include "SystemDefines.hpp"
-#include "CanAutoNodeMotherboard.hpp"
+#include "CanAutoNodeDaughter.hpp"
+#include "LogStructs.hpp"
 
 /************************************
  * MACROS AND DEFINES
@@ -46,9 +47,18 @@ private:
     CANBusTask();        // Private constructor
     CANBusTask(const CANBusTask&);                        // Prevent copy-construction
     CANBusTask& operator=(const CANBusTask&); 			// Prevent assignment
-    void RecieveData();
+    void ServiceCanNetwork();
+    void ReceiveData();
+    void HandleReceivedCanMessage(uint8_t logIndex, const CanImuData9Axis& data);
+    void HandleReceivedCanMessage(uint8_t logIndex, const CanImuData6Axis& data);
+    void HandleReceivedCanMessage(uint8_t logIndex, const CanAccelData& data);
+    void HandleReceivedCanMessage(uint8_t logIndex, const CanGyroData& data);
+    void HandleReceivedCanMessage(uint8_t logIndex, const CanMagData& data);
 
-    CanAutoNodeMotherboard *moth = nullptr;
+    template <typename T>
+    bool ReceiveByIndex(uint8_t logIndex);
+
+    CanAutoNodeDaughter *daughter = nullptr;
 };
 
 /************************************
