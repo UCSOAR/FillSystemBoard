@@ -38,6 +38,7 @@ extern "C" {
 #include "stm32h7xx_ll_pwr.h"
 #include "stm32h7xx_ll_gpio.h"
 #include "stm32h7xx_ll_dma.h"
+#include "stm32h7xx_ll_hsem.h"
 
 #include "stm32h7xx_ll_exti.h"
 
@@ -61,6 +62,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -69,20 +72,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define BARO07_CS_Pin GPIO_PIN_13
-#define BARO07_CS_GPIO_Port GPIOC
-#define BARO11_CS_Pin GPIO_PIN_0
-#define BARO11_CS_GPIO_Port GPIOA
-#define MAG_CS_Pin GPIO_PIN_2
-#define MAG_CS_GPIO_Port GPIOA
-#define MAG_INT_Pin GPIO_PIN_3
-#define MAG_INT_GPIO_Port GPIOA
-#define IMU32_INT_Pin GPIO_PIN_4
-#define IMU32_INT_GPIO_Port GPIOA
-#define IMU32_CS_Pin GPIO_PIN_5
-#define IMU32_CS_GPIO_Port GPIOC
-#define IMU16_INT_Pin GPIO_PIN_15
-#define IMU16_INT_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 
