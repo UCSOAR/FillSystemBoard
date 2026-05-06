@@ -18,9 +18,9 @@
 #include "CommandCenterTask.hpp"
 //#include "IMUTask.hpp"
 //#include "LSM6DSOTask.hpp"
-#include "mmc5983Task.hpp"
-#include "BaroTask07.hpp"
-#include "BaroTask11.hpp"
+//#include "mmc5983Task.hpp"
+//#include "BaroTask07.hpp"
+//#include "BaroTask11.hpp"
 #include "LoggingTask.hpp"
 #include "FlashTask.hpp"
 
@@ -44,9 +44,9 @@ void run_main() {
 	// RadioTask and FSBProtocolTask both receive on UART::RADIO. Use the protobuf
 	// protocol task as the GUI command ingress for the FSB.
 	//RadioTask::Inst().InitTask();
-	FSBProtocolTask::Inst().InitTask();
-	CommandCenterTask::Inst().InitTask();
-	FlashTask::Inst().InitTask();
+//	FSBProtocolTask::Inst().InitTask();
+//	CommandCenterTask::Inst().InitTask();
+//	FlashTask::Inst().InitTask();
 
 	//IMUTask::Inst().InitTask();
 

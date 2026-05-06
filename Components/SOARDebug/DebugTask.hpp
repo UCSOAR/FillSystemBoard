@@ -13,9 +13,9 @@
 #include "DataBroker.hpp"
 //#include "IMUTask.hpp"
 //#include "LSM6DSOTask.hpp"
-#include "mmc5983Task.hpp"
-#include "BaroTask07.hpp"
-#include "BaroTask11.hpp"
+//#include "mmc5983Task.hpp"
+//#include "BaroTask07.hpp"
+//#include "BaroTask11.hpp"
 
 
 /* Enums ------------------------------------------------------------------*/
