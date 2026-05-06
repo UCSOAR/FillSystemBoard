@@ -38,6 +38,7 @@ namespace Driver {
 */
 void run_main() {
     // Init Tasks
+
 	UARTTask::Inst().InitTask();
 	CubeTask::Inst().InitTask();
 	DebugTask::Inst().InitTask();
