@@ -73,10 +73,6 @@ void Error_Handler(void);
 #define BARO07_CS_GPIO_Port GPIOC
 #define BARO11_CS_Pin GPIO_PIN_0
 #define BARO11_CS_GPIO_Port GPIOA
-#define MAG_CS_Pin GPIO_PIN_2
-#define MAG_CS_GPIO_Port GPIOA
-#define MAG_INT_Pin GPIO_PIN_3
-#define MAG_INT_GPIO_Port GPIOA
 #define IMU32_INT_Pin GPIO_PIN_4
 #define IMU32_INT_GPIO_Port GPIOA
 #define IMU32_CS_Pin GPIO_PIN_5

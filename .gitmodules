@@ -7,6 +7,7 @@
 	path = PeripheralDriversSubmodule
 	url = https://github.com/UCSOAR/PeripheralDriversSubmodule.git
 	branch = master
+	
 [submodule "SoarCommunications"]
 	path = SoarCommunications
 	url = https://github.com/UCSOAR/CommunicationSystemsSubmodule.git

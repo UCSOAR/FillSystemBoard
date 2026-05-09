@@ -16,7 +16,7 @@
 #include "Radio/RadioTask.hpp"
 //#include "IMUTask.hpp"
 //#include "LSM6DSOTask.hpp"
-#include "mmc5983Task.hpp"
+//#include "mmc5983Task.hpp"
 #include "BaroTask07.hpp"
 #include "BaroTask11.hpp"
 #include "LoggingTask.hpp"
@@ -26,6 +26,7 @@
 namespace Driver {
     UARTDriver uart8(UART8);
     UARTDriver uart7(UART7);
+    UARTDriver usart3(USART3);
     UARTDriver usart1(USART1);
     UARTDriver uart5(UART5);
 }

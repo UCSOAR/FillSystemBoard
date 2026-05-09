@@ -35,11 +35,13 @@ class UARTDriver;
 namespace Driver {
     //extern UARTDriver uart8;
     //extern UARTDriver uart7;
+    extern UARTDriver usart3;
     extern UARTDriver usart1;
     extern UARTDriver uart5;
 
 }
 namespace UART {
+    constexpr UARTDriver* RS485 = &Driver::usart3;
     constexpr UARTDriver* RADIO = &Driver::uart5;
     constexpr UARTDriver* Debug = &Driver::usart1;
     //constexpr UARTDriver* GPS = &Driver::uart7;
