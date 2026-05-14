@@ -337,7 +337,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LWIP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry excluding="MS5607Driver|MS5611Driver|MAX7456|IMU32|MMC5983MA_SPI|W25NDriver|Components/FDCan.cpp|MX66L1G45GMI|Components/FDCan.h|MMC5983MA_SPI/main_read_test.cpp|Components/LIS3MDLTRDriver.cpp|TMUX1104 Driver|Components|LSM6DSODriver|FDCanG4|Components/LIS3MDLTRDriver.h|CanAutoNode|NAU7802/main_read_test.cpp|PollingTask.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="PeripheralDriversSubmodule"/>
-						<entry excluding="SoarProto/EmbeddedProto/doc|SoarProto/_Python|SoarProto/EmbeddedProto/external|SoarProto/EmbeddedProto/Images|SoarProto/RepeaterTask.cpp|SoarProto/EmbeddedProto/test|SoarProto/PythonTestProject|SoarProto/EmbeddedProto/generator" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="SoarCommunications"/>
+						<entry excluding="SoarProto/EmbeddedProto|SoarProto/EmbeddedProto/doc|SoarProto/_Python|SoarProto/EmbeddedProto/external|SoarProto/EmbeddedProto/Images|SoarProto/RepeaterTask.cpp|SoarProto/EmbeddedProto/test|SoarProto/PythonTestProject|SoarProto/EmbeddedProto/generator" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="SoarCommunications"/>
 						<entry excluding="Profiler" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="SoarOS"/>
 					</sourceEntries>
 				</configuration>
