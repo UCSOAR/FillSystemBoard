@@ -76,5 +76,9 @@ constexpr uint8_t TASK_GPS_PRIORITY = 2;            // Priority of the barometer
 constexpr uint8_t TASK_GPS_QUEUE_DEPTH_OBJS = 10;        // Size of the barometer task queue
 constexpr uint16_t TASK_GPS_STACK_DEPTH_WORDS = 896;        // Size of the barometer task stack
 
+constexpr uint8_t TASK_CAN_PRIORITY = 2;             // Priority of the debug task
+constexpr uint8_t TASK_CAN_QUEUE_DEPTH_OBJS = 10;    // Size of the debug task queue
+constexpr uint16_t TASK_CAN_STACK_DEPTH_WORDS = 512; // Size of the debug task stack
+
 #endif // CUBE_MAIN_SYSTEM_DEFINES_H
 
