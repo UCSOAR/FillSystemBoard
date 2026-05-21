@@ -192,6 +192,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/IMU32}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/LSM6DSODriver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/SoarCommunications/CanAutoNode}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/SoarCommunications/CanAutoNode/LogTypes}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/FDCanH7}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Components/FSBProtocol}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Components/Communication/Inc}&quot;"/>
@@ -219,6 +220,7 @@
 									<listOptionValue builtIn="false" value="../CommunicationSystemSubmodule"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/AirbrakesDriver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/AirbrakesDriver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;/${ProjName}/CommunicationSystemsSubmodule&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.178305537" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -234,6 +236,7 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.includepaths.369497858" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/SoarCommunications/CanAutoNode/LogTypes}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Users\Chris\Desktop\School\SOAR\FSB\FillSystemBoard\SoarCommunications\SoarProto\Aegis&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Users\Chris\Desktop\School\SOAR\FSB\FillSystemBoard\SoarCommunications\SoarProto\EmbeddedProto&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;C:\Users\Chris\Desktop\School\SOAR\FSB\FillSystemBoard\SoarCommunications\SoarProto\EmbeddedProto\src&quot;"/>
@@ -354,6 +357,7 @@
 						<entry excluding="AirbrakesDriver|MS5607Driver|MS5611Driver|MAX7456|IMU32|MMC5983MA_SPI|W25NDriver|Components/FDCan.cpp|MX66L1G45GMI|Components/FDCan.h|MMC5983MA_SPI/main_read_test.cpp|Components/LIS3MDLTRDriver.cpp|TMUX1104 Driver|Components|LSM6DSODriver|FDCanG4|Components/LIS3MDLTRDriver.h|CanAutoNode|NAU7802/main_read_test.cpp|PollingTask.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="PeripheralDriversSubmodule"/>
 						<entry excluding="Profiler" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="SoarOS"/>
 						<entry excluding="SoarProto/EmbeddedProto/doc|SoarProto/_Python|SoarProto/EmbeddedProto/external|SoarProto/EmbeddedProto/Images|SoarProto/RepeaterTask.cpp|SoarProto/PythonTestProject|SoarProto/EmbeddedProto/generator|SoarProto/EmbeddedProto/venv|SoarProto/EmbeddedProto/test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="SoarCommunications"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="SoarCommunications/CanAutoNode"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -474,6 +478,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/W25NDriver/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/AirbrakesDriver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/AirbrakesDriver/Inc}&quot;"/>
+									<listOptionValue value="&quot;${workspace_loc:/${ProjName}/SoarCommunications/CanAutoNode}&quot;"/>
+									<listOptionValue value="&quot;${workspace_loc:/${ProjName}/SoarCommunications/CanAutoNode/LogTypes}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input.1709462416" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input"/>
 							</tool>
@@ -566,6 +572,10 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/W25NDriver/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/AirbrakesDriver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/AirbrakesDriver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;/${ProjName}/CommunicationSystemsSubmodule&quot;"/>
+									<listOptionValue value="&quot;${workspace_loc:/${ProjName}/SoarCommunications}&quot;"/>
+									<listOptionValue value="&quot;${workspace_loc:/${ProjName}/SoarCommunications/CanAutoNode}&quot;"/>
+									<listOptionValue value="&quot;${workspace_loc:/${ProjName}/SoarCommunications/CanAutoNode/LogTypes}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1214004466" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -580,6 +590,7 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.includepaths.1985733113" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Core/Inc"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/SoarCommunications/CanAutoNode/LogTypes}&quot;"/>
 									<listOptionValue builtIn="false" value="../Drivers/STM32H7xx_HAL_Driver/Inc"/>
 									<listOptionValue builtIn="false" value="../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32H7xx/Include"/>

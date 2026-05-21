@@ -80,5 +80,10 @@ constexpr uint8_t TASK_PROFILER_PRIORITY = 2;            // Priority of the prof
 constexpr uint8_t TASK_PROFILER_QUEUE_DEPTH_OBJS = 10;        // Size of the profiler task queue
 constexpr uint16_t TASK_PROFILER_STACK_DEPTH_WORDS = 896;        // Size of the profiler task stack
 
+// CAN BUS TASK
+constexpr uint8_t TASK_CANBUS_PRIORITY = 2;
+constexpr uint8_t TASK_CANBUS_QUEUE_DEPTH_OBJS = 10;
+constexpr uint16_t TASK_CANBUS_STACK_DEPTH_WORDS = 512;
+
 #endif // CUBE_MAIN_SYSTEM_DEFINES_H
 

@@ -74,7 +74,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */
-
+#define CAN_STANDBY_Pin GPIO_PIN_10
+#define CAN_STANDBY_GPIO_Port GPIOA
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
