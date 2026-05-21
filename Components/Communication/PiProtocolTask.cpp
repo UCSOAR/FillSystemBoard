@@ -121,23 +121,16 @@ void PiProtocolTask::HandleProtobufCommandMessage(EmbeddedProto::ReadBufferFixed
 		break;
     }
 
-
-
-
-
-
     case Proto::FsbCommand::Command::FSB_OPEN_AC1: {
-        // GSE_AC1_OPEN_COMMAND ac1_command{true};
-		// CANTask::Inst().SendCANMessageToDaughter(
-		// 	CAN_GSE_TARGET_SOL1,
-		// 	GSE_LogIndexes::_RPB_AIR_BRAKES_COMMAND_LOGINDEX,
-		// 	(uint8_t*) &ac1_command
-		// );
+        GSE_AC1_OPEN_COMMAND ac1_command{true};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL1,
+			GSE_LogIndexes::_GSE_AC1_OPEN_COMMAND_LOGINDEX,
+			(uint8_t*) &ac1_command
+		);
+    }
 
-
-
-
-
+    case Proto::FsbCommand::Command::FSB_CLOSE_AC1: {
         GSE_AC1_OPEN_COMMAND ac1_command{false};
 		CANTask::Inst().SendCANMessageToDaughter(
 			CAN_GSE_TARGET_SOL1,
@@ -146,195 +139,203 @@ void PiProtocolTask::HandleProtobufCommandMessage(EmbeddedProto::ReadBufferFixed
 		);
     }
 
+    case Proto::FsbCommand::Command::FSB_KILL_PAD_BOX1: {
+        GSE_KILL_PADBOX_COMMAND kill_command{true};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL1,
+			GSE_LogIndexes::_GSE_KILL_PADBOX_COMMAND_LOGINDEX,
+			(uint8_t*) &kill_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_IGNITE_PAD_BOX1: {
+        GSE_IGNITE_PADBOX_COMMAND ignite_command{true};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_IGNITOR1,
+			GSE_LogIndexes::_GSE_IGNITE_PADBOX_COMMAND_LOGINDEX,
+			(uint8_t*) &ignite_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_KILL_PAD_BOX2: {
+        GSE_KILL_PADBOX_COMMAND kill_command{true};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL1,
+			GSE_LogIndexes::_GSE_KILL_PADBOX_COMMAND_LOGINDEX,
+			(uint8_t*) &kill_command
+		);
+    }
+    case Proto::FsbCommand::Command::FSB_IGNITE_PAD_BOX2: {
+        GSE_IGNITE_PADBOX_COMMAND ignite_command{true};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_IGNITOR1,
+			GSE_LogIndexes::_GSE_IGNITE_PADBOX_COMMAND_LOGINDEX,
+			(uint8_t*) &ignite_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_OPEN_PBV1: {
+        GSE_OPEN_PBV_COMMAND pbv_command{true};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL1,
+			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+    case Proto::FsbCommand::Command::FSB_CLOSE_PBV1: {
+        GSE_OPEN_PBV_COMMAND pbv_command{false};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL1,
+			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_OPEN_PBV2: {
+        GSE_OPEN_PBV_COMMAND pbv_command{true};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL1,
+			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_CLOSE_PBV2: {
+        GSE_OPEN_PBV_COMMAND pbv_command{true};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL1,
+			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
 
 
+    case Proto::FsbCommand::Command::FSB_OPEN_PBV3: {
+        GSE_OPEN_PBV_COMMAND pbv_command{false};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL1,
+			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_CLOSE_PBV3: {
+        GSE_OPEN_PBV_COMMAND pbv_command{false};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL1,
+			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
 
 
+    case Proto::FsbCommand::Command::FSB_OPEN_PBV4: {
+        GSE_OPEN_PBV_COMMAND pbv_command{true};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL2,
+			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
 
-    // case Proto::FsbCommand::Command::FSB_CLOSE_AC1: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_1;
-    //     Command cmd.enabled = 0;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_KILL_PAD_BOX1: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_1;
-    //     Command cmd.enabled = 0;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_IGNITE_PAD_BOX1: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_IGNITE;
-    //     Command cmd.enabled = 1;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_KILL_PAD_BOX2: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_1;
-    //     Command cmd.enabled = 0;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_IGNITE_PAD_BOX2: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_1;
-    //     Command cmd.enabled = 0;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_OPEN_PBV1: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_2;
-    //     Command cmd.enabled = 1;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_CLOSE_PBV1: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_2;
-    //     Command cmd.enabled = 0;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_OPEN_PBV2: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_2;
-    //     Command cmd.enabled = 1;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_CLOSE_PBV2: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_2;
-    //     Command cmd.enabled = 0;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_OPEN_PBV3: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_2;
-    //     Command cmd.enabled = 1;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_CLOSE_PBV3: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_2;
-    //     Command cmd.enabled = 0;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_OPEN_PBV4: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_2;
-    //     Command cmd.enabled = 1;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_CLOSE_PBV4: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_2;
-    //     Command cmd.enabled = 0;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_OPEN_SOL5: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_2;
-    //     Command cmd.enabled = 1;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_CLOSE_SOL5: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_2;
-    //     Command cmd.enabled = 0;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_OPEN_SOL6: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_2;
-    //     Command cmd.enabled = 1;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_CLOSE_SOL6: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_2;
-    //     Command cmd.enabled = 0;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_OPEN_SOL7: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_3;
-    //     Command cmd.enabled = 1;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_CLOSE_SOL7: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_3;
-    //     Command cmd.enabled = 0;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_OPEN_SOL8A: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_3;
-    //     Command cmd.enabled = 1;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_CLOSE_SOL8A: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_3;
-    //     Command cmd.enabled = 0;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_OPEN_SOL8B: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_3;
-    //     Command cmd.enabled = 1;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
-    // case Proto::FsbCommand::Command::FSB_CLOSE_SOL8B: {
-    //     can msg;
-    //     msg.target = Proto::Node::NODE_FSB_SOL_3;
-    //     Command cmd.enabled = 0;
-    //     msg.command = Proto::MessageID::MSG_CONTROL;
-    //     sendCan(msg);
-    //     break;
-    // }
+    case Proto::FsbCommand::Command::FSB_CLOSE_PBV4: {
+        GSE_OPEN_PBV_COMMAND pbv_command{false};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL2,
+			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_OPEN_SOL5: {
+        GSE_OPEN_SOL5_COMMAND pbv_command{true};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL2,
+			GSE_LogIndexes::_GSE_OPEN_SOL5_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+    case Proto::FsbCommand::Command::FSB_CLOSE_SOL5: {
+        GSE_OPEN_SOL5_COMMAND pbv_command{false};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL2,
+			GSE_LogIndexes::_GSE_OPEN_SOL5_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_OPEN_SOL6: {
+        GSE_OPEN_SOL6_COMMAND pbv_command{true};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL2,
+			GSE_LogIndexes::_GSE_OPEN_SOL6_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_CLOSE_SOL6: {
+        GSE_OPEN_SOL6_COMMAND pbv_command{false};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL2,
+			GSE_LogIndexes::_GSE_OPEN_SOL6_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_OPEN_SOL7: {
+        GSE_OPEN_SOL7_COMMAND pbv_command{false};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL2,
+			GSE_LogIndexes::_GSE_OPEN_SOL7_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_CLOSE_SOL7: {
+        GSE_OPEN_SOL7_COMMAND pbv_command{false};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL2,
+			GSE_LogIndexes::_GSE_OPEN_SOL7_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_OPEN_SOL8A: {
+        GSE_OPEN_SOL8A_COMMAND pbv_command{true};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL2,
+			GSE_LogIndexes::_GSE_OPEN_SOL8A_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+    
+    case Proto::FsbCommand::Command::FSB_CLOSE_SOL8A: {
+        GSE_OPEN_SOL8A_COMMAND pbv_command{false};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL2,
+			GSE_LogIndexes::_GSE_OPEN_SOL8A_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_OPEN_SOL8B: {
+        GSE_OPEN_SOL8B_COMMAND pbv_command{true};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL2,
+			GSE_LogIndexes::_GSE_OPEN_SOL8B_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+
+    case Proto::FsbCommand::Command::FSB_CLOSE_SOL8B: {
+        GSE_OPEN_SOL8B_COMMAND pbv_command{false};
+		CANTask::Inst().SendCANMessageToDaughter(
+			CAN_GSE_TARGET_SOL2,
+			GSE_LogIndexes::_GSE_OPEN_SOL8B_COMMAND_LOGINDEX,
+			(uint8_t*) &pbv_command
+		);
+    }
+
     default:
         SOAR_PRINT("PiProtocolTask - Received Unsupported FSB commmand {%d}\n", msg.get_fsb_command());
 		break;
