@@ -142,7 +142,7 @@ void PiProtocolTask::HandleProtobufCommandMessage(EmbeddedProto::ReadBufferFixed
     case Proto::FsbCommand::Command::FSB_KILL_PAD_BOX1: {
         GSE_KILL_PADBOX_COMMAND kill_command{true};
 		CANTask::Inst().SendCANMessageToDaughter(
-			CAN_GSE_TARGET_SOL1,
+			CAN_GSE_TARGET_IGNITOR1,
 			GSE_LogIndexes::_GSE_KILL_PADBOX_COMMAND_LOGINDEX,
 			(uint8_t*) &kill_command
 		);
@@ -160,7 +160,7 @@ void PiProtocolTask::HandleProtobufCommandMessage(EmbeddedProto::ReadBufferFixed
     case Proto::FsbCommand::Command::FSB_KILL_PAD_BOX2: {
         GSE_KILL_PADBOX_COMMAND kill_command{true};
 		CANTask::Inst().SendCANMessageToDaughter(
-			CAN_GSE_TARGET_SOL1,
+			CAN_GSE_TARGET_IGNITOR2,
 			GSE_LogIndexes::_GSE_KILL_PADBOX_COMMAND_LOGINDEX,
 			(uint8_t*) &kill_command
 		);
@@ -168,81 +168,81 @@ void PiProtocolTask::HandleProtobufCommandMessage(EmbeddedProto::ReadBufferFixed
     case Proto::FsbCommand::Command::FSB_IGNITE_PAD_BOX2: {
         GSE_IGNITE_PADBOX_COMMAND ignite_command{true};
 		CANTask::Inst().SendCANMessageToDaughter(
-			CAN_GSE_TARGET_IGNITOR1,
+			CAN_GSE_TARGET_IGNITOR2,
 			GSE_LogIndexes::_GSE_IGNITE_PADBOX_COMMAND_LOGINDEX,
 			(uint8_t*) &ignite_command
 		);
     }
 
     case Proto::FsbCommand::Command::FSB_OPEN_PBV1: {
-        GSE_OPEN_PBV_COMMAND pbv_command{true};
+        GSE_OPEN_PBV1_COMMAND pbv_command{true};
 		CANTask::Inst().SendCANMessageToDaughter(
 			CAN_GSE_TARGET_SOL1,
-			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			GSE_LogIndexes::_GSE_OPEN_PBV1_COMMAND_LOGINDEX,
 			(uint8_t*) &pbv_command
 		);
     }
     case Proto::FsbCommand::Command::FSB_CLOSE_PBV1: {
-        GSE_OPEN_PBV_COMMAND pbv_command{false};
+        GSE_OPEN_PBV1_COMMAND pbv_command{false};
 		CANTask::Inst().SendCANMessageToDaughter(
 			CAN_GSE_TARGET_SOL1,
-			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			GSE_LogIndexes::_GSE_OPEN_PBV1_COMMAND_LOGINDEX,
 			(uint8_t*) &pbv_command
 		);
     }
 
     case Proto::FsbCommand::Command::FSB_OPEN_PBV2: {
-        GSE_OPEN_PBV_COMMAND pbv_command{true};
+        GSE_OPEN_PBV2_COMMAND pbv_command{true};
 		CANTask::Inst().SendCANMessageToDaughter(
 			CAN_GSE_TARGET_SOL1,
-			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			GSE_LogIndexes::_GSE_OPEN_PBV2_COMMAND_LOGINDEX,
 			(uint8_t*) &pbv_command
 		);
     }
 
     case Proto::FsbCommand::Command::FSB_CLOSE_PBV2: {
-        GSE_OPEN_PBV_COMMAND pbv_command{true};
+        GSE_OPEN_PBV2_COMMAND pbv_command{false};
 		CANTask::Inst().SendCANMessageToDaughter(
 			CAN_GSE_TARGET_SOL1,
-			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			GSE_LogIndexes::_GSE_OPEN_PBV2_COMMAND_LOGINDEX,
 			(uint8_t*) &pbv_command
 		);
     }
 
 
     case Proto::FsbCommand::Command::FSB_OPEN_PBV3: {
-        GSE_OPEN_PBV_COMMAND pbv_command{false};
+        GSE_OPEN_PBV3_COMMAND pbv_command{false};
 		CANTask::Inst().SendCANMessageToDaughter(
 			CAN_GSE_TARGET_SOL1,
-			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			GSE_LogIndexes::_GSE_OPEN_PBV3_COMMAND_LOGINDEX,
 			(uint8_t*) &pbv_command
 		);
     }
 
     case Proto::FsbCommand::Command::FSB_CLOSE_PBV3: {
-        GSE_OPEN_PBV_COMMAND pbv_command{false};
+        GSE_OPEN_PBV3_COMMAND pbv_command{false};
 		CANTask::Inst().SendCANMessageToDaughter(
 			CAN_GSE_TARGET_SOL1,
-			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			GSE_LogIndexes::_GSE_OPEN_PBV3_COMMAND_LOGINDEX,
 			(uint8_t*) &pbv_command
 		);
     }
 
 
     case Proto::FsbCommand::Command::FSB_OPEN_PBV4: {
-        GSE_OPEN_PBV_COMMAND pbv_command{true};
+        GSE_OPEN_PBV4_COMMAND pbv_command{true};
 		CANTask::Inst().SendCANMessageToDaughter(
 			CAN_GSE_TARGET_SOL2,
-			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			GSE_LogIndexes::_GSE_OPEN_PBV4_COMMAND_LOGINDEX,
 			(uint8_t*) &pbv_command
 		);
     }
 
     case Proto::FsbCommand::Command::FSB_CLOSE_PBV4: {
-        GSE_OPEN_PBV_COMMAND pbv_command{false};
+        GSE_OPEN_PBV4_COMMAND pbv_command{false};
 		CANTask::Inst().SendCANMessageToDaughter(
 			CAN_GSE_TARGET_SOL2,
-			GSE_LogIndexes::_GSE_OPEN_PBV_COMMAND_LOGINDEX,
+			GSE_LogIndexes::_GSE_OPEN_PBV4_COMMAND_LOGINDEX,
 			(uint8_t*) &pbv_command
 		);
     }
