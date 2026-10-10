@@ -308,6 +308,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/W25NDriver/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/W25NDriver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/W25NDriver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/AirbrakesDriver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/MAX31856}&quot;"/>
 								</option>
 								<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.languagestandard.606280979" name="Language standard" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.languagestandard" useByScannerDiscovery="true" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.languagestandard.value.gnupp20" valueType="enumerated"/>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp.778577925" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp"/>
@@ -336,7 +338,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LWIP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
-						<entry excluding="MS5607Driver|MS5611Driver|MAX7456|IMU32|MMC5983MA_SPI|W25NDriver|Components/FDCan.cpp|MX66L1G45GMI|Components/FDCan.h|MMC5983MA_SPI/main_read_test.cpp|Components/LIS3MDLTRDriver.cpp|TMUX1104 Driver|Components|LSM6DSODriver|FDCanG4|Components/LIS3MDLTRDriver.h|CanAutoNode|NAU7802/main_read_test.cpp|PollingTask.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="PeripheralDriversSubmodule"/>
+						<entry excluding="MS5607Driver|MS5611Driver|MAX7456|IMU32|MMC5983MA_SPI|W25NDriver|Components/FDCan.cpp|MX66L1G45GMI|Components/FDCan.h|MMC5983MA_SPI/main_read_test.cpp|Components/LIS3MDLTRDriver.cpp|TMUX1104 Driver|Components|LSM6DSODriver|FDCanG4|Components/LIS3MDLTRDriver.h|CanAutoNode|NAU7802/main_read_test.cpp|PollingTask.cpp|AirbrakesDriver|MAX31856" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="PeripheralDriversSubmodule"/>
 						<entry excluding="SoarProto/EmbeddedProto/doc|SoarProto/_Python|SoarProto/EmbeddedProto/external|SoarProto/EmbeddedProto/Images|SoarProto/RepeaterTask.cpp|SoarProto/EmbeddedProto/test|SoarProto/PythonTestProject|SoarProto/EmbeddedProto/generator" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="SoarCommunications"/>
 						<entry excluding="Profiler" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="SoarOS"/>
 					</sourceEntries>

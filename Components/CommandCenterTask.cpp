@@ -21,7 +21,7 @@
 #include "DebugTask.hpp"
 #include "FSBProtocol/FSBProtocolTypes.hpp"
 #include "CanAutoNode.hpp"
-#include "CanAutoNodeMotherBoard.hpp"
+#include "CanAutoNodeMotherboard.hpp"
 #include <string>
 #include <algorithm>
 #include <vector>
