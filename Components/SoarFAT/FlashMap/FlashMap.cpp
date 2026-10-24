@@ -39,11 +39,15 @@ FlashMap& FlashMap::Inst(void) {
 FlashMap::FlashMap(void) { }
 
 void FlashMap::Init(void) {
+    mutex.Lock();
+
     MX66xxQSPI_ReleaseFromDeepPowerDown();
     MX66xxQSPI_RSTEN();
     MX66xxQSPI_RST();
     MX66xxQSPI_EQIO_1LINE();
     MX66xxQSPI_EN4B();
+
+    initialized = false;
 
     if (!MX66xxQSPI_Init()) {
         SOAR_PRINT("FlashMap::InitFlash() - MX66 init failed\n");
@@ -60,10 +64,16 @@ void FlashMap::Init(void) {
     
     // Mark all sectors as not dirty.    
     for (uint16_t i = 0; i < NUM_LOGICAL_SECTORS; i++) {
-        is_dirty[i] = false; 
+        is_dirty_logical[i] = false; 
     }
 
     initialized = true;
+}
+
+void Trim(uint32_t timeout_ms) {
+    // Erase sectors on the flash chip with that are flagged as free and dirty
+
+    SOAR_PRINT("FlashMap::Trim() - Not implemented\n");
 }
 
 void FlashMap::SerializeMapSectorsToFlash(void) {
