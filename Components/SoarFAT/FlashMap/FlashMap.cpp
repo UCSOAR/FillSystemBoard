@@ -12,7 +12,6 @@
 
 #include "FlashMap.hpp"
 
-#include "LoggingService.hpp"
 #include "mx66xx_qspi.hpp"
 #include "CubeDefines.hpp"
 
@@ -52,10 +51,10 @@ void FlashMap::Init(void) {
     }
 
     uint8_t status = MX66xxQSPI_ReadStatusRegister();
-    SOAR_PRINT("FlashMap::InitFlash() - Status1: 0x%02x\n", status);
+    SOAR_PRINT("FlashMap::Init() - Status1: 0x%02x\n", status);
 
     uint32_t id = MX66xxQSPI_QPIReadID();
-    SOAR_PRINT("FlashMap::InitFlash() - MX66 ReadID: 0x%06lx\n", id);
+    SOAR_PRINT("FlashMap::Init() - MX66 ReadID: 0x%06lx\n", id);
 
     // Load map into RAM
     
@@ -67,20 +66,20 @@ void FlashMap::Init(void) {
     initialized = true;
 }
 
-void FlashMap::SerializeBootSectorToRam(void) {
+void FlashMap::SerializeMapSectorsToFlash(void) {
     if (!initialized) {
-        SOAR_PRINT("FlashMap::SerializeBootSectorToRam() - MX66 not initialized\n");
+        SOAR_PRINT("FlashMap::SerializeMapSectorsToFlash() - MX66 not initialized\n");
         return;
     }
 
-    SOAR_PRINT("FlashMap::SerializeBootSectorToRam() - Not implemented\n");
+    SOAR_PRINT("FlashMap::SerializeMapSectorsToFlash() - Not implemented\n");
 }
 
-void FlashMap::DeserializeBootSectorFromRam(void) {
+void FlashMap::DeserializeMapSectorsFromFlash(void) {
     if (!initialized) {
-        SOAR_PRINT("FlashMap::DeserializeBootSectorFromRam() - MX66 not initialized\n");
+        SOAR_PRINT("FlashMap::DeserializeMapSectorsFromFlash() - MX66 not initialized\n");
         return;
     }
 
-    SOAR_PRINT("FlashMap::DeserializeBootSectorFromRam() - Not implemented\n");
+    SOAR_PRINT("FlashMap::DeserializeMapSectorsFromFlash() - Not implemented\n");
 }

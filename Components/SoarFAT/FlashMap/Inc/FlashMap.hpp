@@ -27,9 +27,9 @@ constexpr uint16_t NUM_PHYSICAL_SECTORS = 32768;
 
 // The total size of data stored per-sector in the reserved area is
 // represented by n sectors, where n is the number of bits used per-sector.
-// Set NUM_BOOT_SECTORS = n
-constexpr uint16_t NUM_BOOT_SECTORS = 18;
-constexpr uint16_t NUM_LOGICAL_SECTORS = NUM_PHYSICAL_SECTORS - NUM_BOOT_SECTORS;
+// Set NUM_MAP_SECTORS = n
+constexpr uint16_t NUM_MAP_SECTORS = 18;
+constexpr uint16_t NUM_LOGICAL_SECTORS = NUM_PHYSICAL_SECTORS - NUM_MAP_SECTORS;
 
 /************************************
  * TYPEDEFS
@@ -41,7 +41,7 @@ constexpr uint16_t NUM_LOGICAL_SECTORS = NUM_PHYSICAL_SECTORS - NUM_BOOT_SECTORS
 
 class FlashMap {
 private:
-    // Boot sector metadata
+    // Map sector metadata
     uint16_t physical_sector[NUM_LOGICAL_SECTORS];
     bool is_free[NUM_LOGICAL_SECTORS];
     bool is_dirty[NUM_LOGICAL_SECTORS];
@@ -53,8 +53,8 @@ public:
     void Init(void);
 private:
     FlashMap(void);
-    void SerializeBootSectorToRam(void);
-    void DeserializeBootSectorFromRam(void);
+    void SerializeMapSectorsToFlash(void);
+    void DeserializeMapSectorsFromFlash(void);
 };
 
 /************************************
