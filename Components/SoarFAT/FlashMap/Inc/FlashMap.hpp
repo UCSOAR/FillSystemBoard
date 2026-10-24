@@ -43,37 +43,37 @@ constexpr uint16_t NUM_LOGICAL_SECTORS = NUM_PHYSICAL_SECTORS - NUM_MAP_SECTORS;
 
 class FlashMap {
 private:
-  /**
-   * Physical sector associated with the logical index. Has 0 if there is
-   * currently no association. 
-   * Indexed by logical sector.
-   */
-  uint16_t physical_sector[NUM_LOGICAL_SECTORS];
+    /**
+     * Physical sector associated with the logical index. Has 0 if there is
+     * currently no association. 
+     * Indexed by logical sector.
+     */
+    uint16_t physical_sector[NUM_LOGICAL_SECTORS];
 
-  /**
-   * Flag that marks whether the sector has been modified and needs to be
-   * written to the flash.
-   * Indexed by logical sector.
-   */
-  bool is_dirty_logical[NUM_LOGICAL_SECTORS];
+    /**
+     * Flag that marks whether the sector has been modified and needs to be
+     * written to the flash.
+     * Indexed by logical sector.
+     */
+    bool is_dirty_logical[NUM_LOGICAL_SECTORS];
 
-  /**
-   * Flag that marks whether a physical sector is currently referenced by a
-   * logical sector.
-   * Indexed by physical sector.
-   */
-  bool is_free[NUM_LOGICAL_SECTORS];
+    /**
+     * Flag that marks whether a physical sector is currently referenced by a
+     * logical sector.
+     * Indexed by physical sector.
+     */
+    bool is_free[NUM_LOGICAL_SECTORS];
 
-  /**
-   * Flag that marks whether the sector sector needs to be erased.
-   * Indexed by physical sector.
-   */
-  bool is_dirty_physical[NUM_LOGICAL_SECTORS];
+    /**
+     * Flag that marks whether the sector sector needs to be erased.
+     * Indexed by physical sector.
+     */
+    bool is_dirty_physical[NUM_LOGICAL_SECTORS];
 
-  // Global variables
-  bool initialized = false;
-  Mutex mutex;
-    
+    // Global variables
+    bool initialized = false;
+    Mutex mutex;
+
 public:
     static FlashMap& Inst(void);
     void Init(void);
