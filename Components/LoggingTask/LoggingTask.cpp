@@ -86,7 +86,7 @@ void LoggingTask::InitTask()
 	DataBroker::Subscribe<BaroData>(this);
 	DataBroker::Subscribe<MagData>(this);
 	DataBroker::Subscribe<ThermocoupleData>(this);
-	DataBroker::Subscribe<LoadCellData>(this);
+	//DataBroker::Subscribe<LoadCellData>(this);
 
 }
 
@@ -152,7 +152,7 @@ void LoggingTask::HandleCommand(Command& cm){
 		break;
 	}
 
-	case DataBrokerMessageTypes:: MAG_DATA:
+	case DataBrokerMessageTypes::MAG_DATA:
 	{
 		MagData data = DataBroker::ExtractData<MagData>(cm);
 
@@ -217,7 +217,7 @@ void LoggingTask::HandleCommand(Command& cm){
 
 		break;
 	}
-	case DataBrokerMessageTypes::THERMOCOUPLE_DATA:{
+	case DataBrokerMessageTypes::TC_DATA:{
 		ThermocoupleData data = DataBroker::ExtractData<ThermocoupleData>(cm);
 
 		// Get timestamp in ms
@@ -241,6 +241,7 @@ void LoggingTask::HandleCommand(Command& cm){
 		err = log.LogData();
 		break;
 	}
+/*
 	case DataBrokerMessageTypes::LOADCELL_DATA:{
 		LoadCellData data = DataBroker::ExtractData<LoadCellData>(cm);
 
@@ -265,6 +266,7 @@ void LoggingTask::HandleCommand(Command& cm){
 		err = log.LogData();
 		break;
 	}
+*/
 	case DataBrokerMessageTypes :: INVALID:
 	{
 		cm.Reset();
@@ -288,5 +290,3 @@ void LoggingTask::HandleCommand(Command& cm){
 	return;
 
 }
-
-

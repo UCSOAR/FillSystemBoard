@@ -11,7 +11,7 @@
 #include "UARTTask.hpp"
 
 FSBProtocolTask::FSBProtocolTask()
-    : ProtocolTask(Proto::Node::NODE_RCU, UART::RADIO, UART_TASK_COMMAND_SEND_RADIO),
+    : ProtocolTask(Proto::Node::NODE_FSB, UART::RADIO, UART_TASK_COMMAND_SEND_RADIO),
       nextTxSequenceNum(1)
 {
 }
@@ -90,8 +90,8 @@ void FSBProtocolTask::HandleProtobufCommandMessage(
 bool FSBProtocolTask::SendFcbRadioCommand(Proto::FcbCommand::Command command, uint32_t sequenceNum)
 {
     Proto::CommandMessage msg;
-    msg.set_source(Proto::Node::NODE_RCU);
-    msg.set_target(Proto::Node::NODE_DMB);
+    msg.set_source(Proto::Node::NODE_FSB);
+    msg.set_target(Proto::Node::NODE_FCB);
     msg.set_source_sequence_num(sequenceNum == 0 ? nextTxSequenceNum++ : sequenceNum);
     msg.mutable_fcb_command().set_command_enum(command);
 

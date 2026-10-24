@@ -310,6 +310,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/W25NDriver/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/AirbrakesDriver/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/MAX31856}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/SoarCommunications/CanAutoNode/Targets}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/SoarCommunications/SoarProto/Eos/_C++}&quot;"/>
 								</option>
 								<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.languagestandard.606280979" name="Language standard" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.languagestandard" useByScannerDiscovery="true" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.languagestandard.value.gnupp20" valueType="enumerated"/>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp.778577925" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp"/>
@@ -639,6 +641,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/W25NDriver/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/W25NDriver}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/PeripheralDriversSubmodule/W25NDriver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="/media/Shared/Documents/University/SOAR/repos/fsb/SoarCommunications/CanAutoNode"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp.906381921" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp"/>
 							</tool>
