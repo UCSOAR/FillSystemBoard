@@ -111,7 +111,7 @@ static uint32_t PJWHash(uint32_t s) {
         high = h & 0xF0000000;
 
         if (high != 0) {
-            h ^= high >> 24 & !high;
+            h ^= high >> 24 & ~high;
         }
     }
 
