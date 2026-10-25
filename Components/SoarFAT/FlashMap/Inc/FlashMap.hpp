@@ -17,9 +17,10 @@
  * INCLUDES
  ************************************/
 
-#include <stdint.h>
-
 #include "Mutex.hpp"
+#include "BitArray.hpp"
+
+#include <stdint.h>
 
 /************************************
  * MACROS AND DEFINES
@@ -30,7 +31,7 @@ constexpr uint16_t NUM_PHYSICAL_SECTORS = 32768;
 // The total size of data stored per-sector in the reserved area is
 // represented by n sectors, where n is the number of bits used per-sector.
 // Set NUM_MAP_SECTORS = n
-constexpr uint16_t NUM_MAP_SECTORS = 18;
+constexpr uint16_t NUM_MAP_SECTORS = 19;
 constexpr uint16_t NUM_LOGICAL_SECTORS = NUM_PHYSICAL_SECTORS - NUM_MAP_SECTORS;
 
 /************************************
@@ -55,20 +56,20 @@ private:
      * written to the flash.
      * Indexed by logical sector.
      */
-    bool is_dirty_logical[NUM_LOGICAL_SECTORS];
+    BitArray<NUM_LOGICAL_SECTORS> is_dirty_logical;
 
     /**
      * Flag that marks whether a physical sector is currently referenced by a
      * logical sector.
      * Indexed by physical sector.
      */
-    bool is_free[NUM_LOGICAL_SECTORS];
+    BitArray<NUM_LOGICAL_SECTORS> is_free;
 
     /**
      * Flag that marks whether the sector sector needs to be erased.
      * Indexed by physical sector.
      */
-    bool is_dirty_physical[NUM_LOGICAL_SECTORS];
+    BitArray<NUM_LOGICAL_SECTORS> is_dirty_physical;
 
     // Global variables
     bool initialized = false;

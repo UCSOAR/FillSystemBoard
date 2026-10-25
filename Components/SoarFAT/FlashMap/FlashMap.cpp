@@ -62,9 +62,9 @@ void FlashMap::Init(void) {
 
     // Load map into RAM
     
-    // Mark all sectors as not dirty.    
+    // Mark all logical sectors as not dirty.
     for (uint16_t i = 0; i < NUM_LOGICAL_SECTORS; i++) {
-        is_dirty_logical[i] = false; 
+        is_dirty_logical.reset(i);
     }
 
     initialized = true;
