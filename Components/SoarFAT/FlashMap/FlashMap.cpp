@@ -61,13 +61,8 @@ void FlashMap::Init(void) {
     uint32_t id = MX66xxQSPI_QPIReadID();
     SOAR_PRINT("FlashMap::Init() - MX66 ReadID: 0x%06lx\n", id);
 
-    // Load map into RAM
+    // Load map into RAM and patch it with the log contents
     
-    // Mark all logical sectors as not dirty.
-    for (size_t i = 0; i < NUM_LOGICAL_SECTORS; i++) {
-        is_dirty_logical.reset(i);
-    }
-
     initialized = true;
 
     mutex.Unlock();
@@ -106,5 +101,9 @@ uint32_t FlashMap::NewSector(void) {
 	h *= 0xc2b2ae35;
 	h ^= h >> 16;
 
-    return h % NUM_LOGICAL_SECTORS;
+    return h % NUM_DATA_SECTORS;
+}
+
+constexpr size_t FlashMap::MapStart(map_label_e map) {
+    return 1 + static_cast<size_t>(map) * NUM_SECTORS_PER_MAP;
 }
