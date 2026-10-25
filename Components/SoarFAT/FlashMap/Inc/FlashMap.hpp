@@ -27,13 +27,13 @@
  * MACROS AND DEFINES
  ************************************/
 
-constexpr uint16_t NUM_PHYSICAL_SECTORS = 32768;
+constexpr size_t NUM_PHYSICAL_SECTORS = 32768;
 
 // The total size of data stored per-sector in the reserved area is
-// represented by n sectors, where n is the number of bits used per-sector.
-// Set NUM_MAP_SECTORS = n
-constexpr uint16_t NUM_MAP_SECTORS = 19;
-constexpr uint16_t NUM_LOGICAL_SECTORS = NUM_PHYSICAL_SECTORS - NUM_MAP_SECTORS;
+// represented by n sectors, where n is the number of bits used per-sector in
+// the map. Set NUM_MAP_SECTORS = n
+constexpr size_t NUM_MAP_SECTORS = 19;
+constexpr size_t NUM_LOGICAL_SECTORS = NUM_PHYSICAL_SECTORS - NUM_MAP_SECTORS;
 
 /************************************
  * TYPEDEFS
