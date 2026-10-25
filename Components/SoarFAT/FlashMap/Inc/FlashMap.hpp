@@ -27,17 +27,23 @@
  * MACROS AND DEFINES
  ************************************/
 
-constexpr size_t NUM_PHYSICAL_SECTORS = 32768;
-
-// The total size of data stored per-sector in the reserved area is
-// represented by n sectors, where n is the number of bits used per-sector in
-// the map. Set NUM_MAP_SECTORS = n
-constexpr size_t NUM_MAP_SECTORS = 19;
-constexpr size_t NUM_LOGICAL_SECTORS = NUM_PHYSICAL_SECTORS - NUM_MAP_SECTORS;
+#define FLASH_CAPACITY_BYTES 134217728
+#define SECTOR_SIZE_BYTES    4096
 
 /************************************
  * TYPEDEFS
  ************************************/
+
+constexpr size_t NUM_PHYSICAL_SECTORS = FLASH_CAPACITY_BYTES / SECTOR_SIZE_BYTES;
+
+/**
+ * The total size of data stored per-sector in the reserved area is
+ * represented by n sectors, where n is the number of bits used per-sector in
+ * the map. Set NUM_MAP_SECTORS = n
+ */
+constexpr size_t NUM_MAP_SECTORS = 19;
+
+constexpr size_t NUM_LOGICAL_SECTORS = NUM_PHYSICAL_SECTORS - NUM_MAP_SECTORS;
 
 /************************************
  * CLASS DEFINITIONS
@@ -84,6 +90,12 @@ private:
     FlashMap(void);
     void SerializeMapSectorsToFlash(void);
     void DeserializeMapSectorsFromFlash(void);
+
+    /**
+     * Finds a new random physical sector using the MurmurHash3 mixer finalizer.
+     * See https://en.wikipedia.org/wiki/MurmurHash
+     */
+    static uint32_t NewSector(void);
 };
 
 /************************************

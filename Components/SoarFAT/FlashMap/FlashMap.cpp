@@ -12,8 +12,9 @@
 
 #include "FlashMap.hpp"
 
-#include "mx66xx_qspi.hpp"
 #include "CubeDefines.hpp"
+#include "stm32h7xx_hal.h"
+#include "mx66xx_qspi.hpp"
 
 /************************************
  * PRIVATE MACROS AND DEFINES
@@ -26,12 +27,6 @@
 /************************************
  * FUNCTION DECLARATIONS
  ************************************/
-
-/**
- * Hashing function to be used for getting a random physical sector.
- * See https://en.wikipedia.org/wiki/PJW_hash_function
- */
-static uint32_t PJWHash(uint32_t in);
 
 /************************************
  * FUNCTION DEFINITIONS
@@ -102,18 +97,14 @@ void FlashMap::DeserializeMapSectorsFromFlash(void) {
     SOAR_PRINT("FlashMap::DeserializeMapSectorsFromFlash() - Not implemented\n");
 }
 
-static uint32_t PJWHash(uint32_t s) {
-    uint32_t h = 0;
-    uint32_t high;
+uint32_t FlashMap::NewSector(void) {
+    uint32_t h = HAL_GetTick();
 
-    for (uint32_t i = 0; i < 32; i += 8) {
-        h = (h << 4) + ((s >> i) & 0xFF);
-        high = h & 0xF0000000;
+    h ^= h >> 16;
+	h *= 0x85ebca6b;
+	h ^= h >> 13;
+	h *= 0xc2b2ae35;
+	h ^= h >> 16;
 
-        if (high != 0) {
-            h ^= high >> 24 & ~high;
-        }
-    }
-
-    return h;
+    return h % NUM_LOGICAL_SECTORS;
 }
