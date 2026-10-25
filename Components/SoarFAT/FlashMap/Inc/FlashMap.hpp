@@ -21,6 +21,7 @@
 #include "BitArray.hpp"
 
 #include <stdint.h>
+#include <atomic>
 
 /************************************
  * MACROS AND DEFINES
@@ -49,7 +50,7 @@ private:
      * currently no association. 
      * Indexed by logical sector.
      */
-    uint16_t physical_sector[NUM_LOGICAL_SECTORS];
+    std::atomic_uint16_t physical_sector[NUM_LOGICAL_SECTORS];
 
     /**
      * Flag that marks whether the sector has been modified and needs to be
