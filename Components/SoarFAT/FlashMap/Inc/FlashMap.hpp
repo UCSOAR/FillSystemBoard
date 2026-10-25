@@ -30,6 +30,8 @@
 #define FLASH_CAPACITY_BYTES 134217728
 #define SECTOR_SIZE_BYTES    4096
 
+#define DIV_CEIL(x,y) (((x) + (y) - 1) / (y))
+
 /************************************
  * TYPEDEFS
  ************************************/
@@ -53,7 +55,7 @@ private:
      * metadata.
      */
     static constexpr size_t NUM_MAP_SECTORS =
-        NUM_PHYSICAL_SECTORS * CLASS_BITS_PER_SECTOR / SECTOR_SIZE_BYTES / 8;
+        DIV_CEIL(NUM_PHYSICAL_SECTORS * CLASS_BITS_PER_SECTOR, SECTOR_SIZE_BYTES * 8);
 
     /**
      * The number of available sectors for data storage. Used for the index of
