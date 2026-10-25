@@ -68,6 +68,8 @@ void FlashMap::Init(void) {
     }
 
     initialized = true;
+
+    mutex.Unlock();
 }
 
 void Trim(uint32_t timeout_ms) {
