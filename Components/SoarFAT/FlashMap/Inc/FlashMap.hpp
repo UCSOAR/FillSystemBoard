@@ -34,16 +34,7 @@
  * TYPEDEFS
  ************************************/
 
-constexpr size_t NUM_PHYSICAL_SECTORS = FLASH_CAPACITY_BYTES / SECTOR_SIZE_BYTES;
-
-/**
- * The total size of data stored per-sector in the reserved area is
- * represented by n sectors, where n is the number of bits used per-sector in
- * the map. Set NUM_MAP_SECTORS = n
- */
-constexpr size_t NUM_MAP_SECTORS = 19;
-
-constexpr size_t NUM_LOGICAL_SECTORS = NUM_PHYSICAL_SECTORS - NUM_MAP_SECTORS;
+static constexpr size_t NUM_PHYSICAL_SECTORS = FLASH_CAPACITY_BYTES / SECTOR_SIZE_BYTES;
 
 /************************************
  * CLASS DEFINITIONS
@@ -52,8 +43,28 @@ constexpr size_t NUM_LOGICAL_SECTORS = NUM_PHYSICAL_SECTORS - NUM_MAP_SECTORS;
 class FlashMap {
 private:
     /**
+     * The total size of metadata stored per sector, in bits.
+     * NOTE: This must be updated whenever the metadata requirements change.
+     */
+    static constexpr uint32_t CLASS_BITS_PER_SECTOR = 19;
+
+    /**
+     * The number of sectors at the start of flash allocated for sector
+     * metadata.
+     */
+    static constexpr size_t NUM_MAP_SECTORS =
+        NUM_PHYSICAL_SECTORS * CLASS_BITS_PER_SECTOR / SECTOR_SIZE_BYTES / 8;
+
+    /**
+     * The number of available sectors for data storage. Used for the index of
+     * logical sectors and their physical sector equivalents.
+     */
+    static constexpr size_t NUM_LOGICAL_SECTORS =
+        NUM_PHYSICAL_SECTORS - NUM_MAP_SECTORS;
+
+    /**
      * Physical sector associated with the logical index. Has 0 if there is
-     * currently no association. 
+     * currently no association.
      * Indexed by logical sector.
      */
     std::atomic_uint16_t physical_sector[NUM_LOGICAL_SECTORS];
