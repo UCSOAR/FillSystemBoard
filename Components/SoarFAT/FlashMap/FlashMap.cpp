@@ -104,6 +104,6 @@ uint32_t FlashMap::NewSector(void) {
     return h % NUM_DATA_SECTORS;
 }
 
-constexpr size_t FlashMap::MapStart(map_label_e map) {
+constexpr size_t FlashMap::MapOffset(map_label_e map) {
     return 1 + static_cast<size_t>(map) * NUM_SECTORS_PER_MAP;
 }

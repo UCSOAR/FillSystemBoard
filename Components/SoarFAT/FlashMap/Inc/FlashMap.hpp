@@ -84,10 +84,22 @@ private:
         SECTOR_SIZE_BYTES * 8);
 
     /**
+     * The number of sectors to using for tracking changes made to the map
+     * before committing them.
+     */
+    static constexpr size_t NUM_LOG_SECTORS = 1;
+
+    /**
+     * The sector number of the first log sector.
+     */
+    static constexpr size_t LOG_SECTOR_OFFSET =
+        1 + NUM_SECTORS_PER_MAP * NUM_MAPS;
+
+    /**
      * The sector number of the first data sector.
      */
     static constexpr size_t DATA_SECTOR_OFFSET =
-        1 + NUM_SECTORS_PER_MAP * NUM_MAPS;
+        LOG_SECTOR_OFFSET + NUM_LOG_SECTORS;
 
     /**
      * The number of available sectors for data storage. Used for the index of
@@ -122,6 +134,7 @@ private:
 
     map_label_e cur_map;
     uint32_t seq_number;
+    size_t log_idx;
 
 public:
     static FlashMap& Inst(void);
@@ -143,7 +156,7 @@ private:
      * The sector number will always be at least 1 because sector 0 is reserved
      * for static flash metadata.
      */
-    static constexpr size_t MapStart(map_label_e map);
+    static constexpr size_t MapOffset(map_label_e map);
 };
 
 /************************************
