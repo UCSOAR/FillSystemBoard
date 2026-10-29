@@ -163,7 +163,6 @@ private:
 
     // Global variables
     bool initialized = false;
-    Mutex mutex;
 
 public:
     static FlashMap& Inst(void);

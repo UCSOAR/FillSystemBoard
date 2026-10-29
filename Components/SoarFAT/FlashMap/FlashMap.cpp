@@ -45,8 +45,6 @@ FlashMap& FlashMap::Inst(void) {
 FlashMap::FlashMap(void) { }
 
 void FlashMap::Init(void) {
-    mutex.Lock();
-
     InitSequence();
 
     initialized = false;
@@ -62,11 +60,11 @@ void FlashMap::Init(void) {
     uint32_t id = MX66xxQSPI_QPIReadID();
     SOAR_PRINT("FlashMap::Init() - MX66 ReadID: 0x%06lx\n", id);
 
-    // Load map into RAM and patch it with the log contents
+    // Read Sector 0 and confirm contents are as expected
+    uint8_t buf[SECTOR_SIZE_BYTES];
+    MX66xxQSPI_ReadSector(buf, 0, 0, SECTOR_SIZE_BYTES);
     
     initialized = true;
-
-    mutex.Unlock();
 }
 
 void FlashMap::InitSequence(void) {
@@ -78,7 +76,12 @@ void FlashMap::InitSequence(void) {
 }
 
 void FlashMap::Format(void) {
-    mutex.Lock();
+    InitSequence();
+
+    if (!MX66xxQSPI_Init()) {
+        SOAR_PRINT("FlashMap::Format() - MX66 init failed\n");
+        return;
+    }
 
     SOAR_PRINT("FlashMap::Format() - Chip erase started\n");
     MX66xxQSPI_EraseChip();
@@ -88,10 +91,15 @@ void FlashMap::Format(void) {
 
     uint8_t num_maps = NUM_MAPS;
 
+    // Write static metadata to physical sector 0 of the flash for verification.
     uint8_t *ptr = buf;
-    ptr = BufPut(ptr, (void *)&MAGIC_NUMBER, sizeof(MAGIC_NUMBER));
-    ptr = BufPut(ptr, (void *)&num_maps, sizeof(num_maps));
-    ptr = BufPut(ptr, (void *)&NUM_SECTORS_PER_MAP, sizeof(NUM_SECTORS_PER_MAP));
+    ptr = BufPut(ptr, (void *)&MAGIC_NUMBER,                sizeof(MAGIC_NUMBER));
+    ptr = BufPut(ptr, (void *)&NUM_PHYSICAL_SECTORS,        sizeof(NUM_PHYSICAL_SECTORS));
+    ptr = BufPut(ptr, (void *)&num_maps,                    sizeof(num_maps));
+    ptr = BufPut(ptr, (void *)&NUM_SECTORS_PER_MAP,         sizeof(NUM_SECTORS_PER_MAP));
+    ptr = BufPut(ptr, (void *)&NUM_LOG_SECTORS,             sizeof(NUM_LOG_SECTORS));
+    ptr = BufPut(ptr, (void *)&NUM_DATA_SECTORS_PHYSICAL,   sizeof(NUM_DATA_SECTORS_PHYSICAL));
+    ptr = BufPut(ptr, (void *)&NUM_OVERPROVISIONED_SECTORS, sizeof(NUM_OVERPROVISIONED_SECTORS));
 
     uint8_t crc = CRC8(buf, ptr - buf);
     BufPut(ptr, (void *)&crc, sizeof(crc));
@@ -99,8 +107,6 @@ void FlashMap::Format(void) {
     SOAR_PRINT("FlashMap::Format() - Writing sector 0\n");
     MX66xxQSPI_WriteSector(buf, 0, 0, SECTOR_SIZE_BYTES);
     SOAR_PRINT("FlashMap::Format() - Finished writing sector 0\n");
-
-    mutex.Unlock();
 }
 
 void Trim(uint32_t timeout_ms) {
