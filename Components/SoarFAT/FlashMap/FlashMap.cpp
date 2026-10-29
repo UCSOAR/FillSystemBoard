@@ -42,8 +42,6 @@ FlashMap& FlashMap::Inst(void) {
     return inst;
 }
 
-FlashMap::FlashMap(void) { }
-
 void FlashMap::Init(void) {
     InitSequence();
 
@@ -107,30 +105,6 @@ void FlashMap::Format(void) {
     SOAR_PRINT("FlashMap::Format() - Writing sector 0\n");
     MX66xxQSPI_WriteSector(buf, 0, 0, SECTOR_SIZE_BYTES);
     SOAR_PRINT("FlashMap::Format() - Finished writing sector 0\n");
-}
-
-void Trim(uint32_t timeout_ms) {
-    // Erase sectors on the flash chip with that are flagged as free and dirty
-
-    SOAR_PRINT("FlashMap::Trim() - Not implemented\n");
-}
-
-void FlashMap::SerializeMapSectorsToFlash(void) {
-    if (!initialized) {
-        SOAR_PRINT("FlashMap::SerializeMapSectorsToFlash() - MX66 not initialized\n");
-        return;
-    }
-
-    SOAR_PRINT("FlashMap::SerializeMapSectorsToFlash() - Not implemented\n");
-}
-
-void FlashMap::DeserializeMapSectorsFromFlash(void) {
-    if (!initialized) {
-        SOAR_PRINT("FlashMap::DeserializeMapSectorsFromFlash() - MX66 not initialized\n");
-        return;
-    }
-
-    SOAR_PRINT("FlashMap::DeserializeMapSectorsFromFlash() - Not implemented\n");
 }
 
 uint32_t FlashMap::NewSector(void) {

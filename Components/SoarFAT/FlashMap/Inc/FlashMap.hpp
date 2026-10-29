@@ -165,15 +165,30 @@ private:
     bool initialized = false;
 
 public:
+    /**
+     * Returns the singleton instance of FlashMap. Must be stored as a 
+     * reference in the user-level code.
+     */
     static FlashMap& Inst(void);
+
+    /**
+     * Initializes the flash chip. Must be called before anything else.
+     * Confirms the validity of sector 0, and loads the sector metadata into
+     * RAM if valid.
+     */
     void Init(void);
-    void InitSequence(void);
+
+    /**
+     * Erases the flash chip and writes the required static metadata to sector 0.
+     */
     void Format(void);
-    void Trim(uint32_t timeout_ms);
 private:
-    FlashMap(void);
-    void SerializeMapSectorsToFlash(void);
-    void DeserializeMapSectorsFromFlash(void);
+    FlashMap(void) { };
+
+    /**
+     * Calls the sequence of commands that must be run prior to initialization.
+     */
+    void InitSequence(void);
 
     /**
      * Finds a new random physical sector using the MurmurHash3 mixer finalizer.
