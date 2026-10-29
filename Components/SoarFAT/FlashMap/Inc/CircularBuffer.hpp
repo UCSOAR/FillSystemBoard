@@ -3,7 +3,8 @@
  * @file    CircularBuffer.hpp
  * @author  Jacob Plourde (Jacobplo)
  * @date    October 28, 2026
- * @brief   
+ * @brief   Implements a queue using a CircularBuffer as a template for variable
+ *          types and sizes.
  ********************************************************************************
  */
 
