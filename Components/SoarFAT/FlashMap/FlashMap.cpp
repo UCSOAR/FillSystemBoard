@@ -11,10 +11,13 @@
  ************************************/
 
 #include "FlashMap.hpp"
+#include "CRC8.hpp"
 
 #include "CubeDefines.hpp"
 #include "stm32h7xx_hal.h"
 #include "mx66xx_qspi.hpp"
+
+#include <cstring>
 
 /************************************
  * PRIVATE MACROS AND DEFINES
@@ -27,6 +30,8 @@
 /************************************
  * FUNCTION DECLARATIONS
  ************************************/
+
+static uint8_t *BufPut(uint8_t *buf, void *src, size_t n);
 
 /************************************
  * FUNCTION DEFINITIONS
@@ -42,11 +47,7 @@ FlashMap::FlashMap(void) { }
 void FlashMap::Init(void) {
     mutex.Lock();
 
-    MX66xxQSPI_ReleaseFromDeepPowerDown();
-    MX66xxQSPI_RSTEN();
-    MX66xxQSPI_RST();
-    MX66xxQSPI_EQIO_1LINE();
-    MX66xxQSPI_EN4B();
+    InitSequence();
 
     initialized = false;
 
@@ -64,6 +65,40 @@ void FlashMap::Init(void) {
     // Load map into RAM and patch it with the log contents
     
     initialized = true;
+
+    mutex.Unlock();
+}
+
+void FlashMap::InitSequence(void) {
+    MX66xxQSPI_ReleaseFromDeepPowerDown();
+    MX66xxQSPI_RSTEN();
+    MX66xxQSPI_RST();
+    MX66xxQSPI_EQIO_1LINE();
+    MX66xxQSPI_EN4B();
+}
+
+void FlashMap::Format(void) {
+    mutex.Lock();
+
+    SOAR_PRINT("FlashMap::Format() - Chip erase started\n");
+    MX66xxQSPI_EraseChip();
+    SOAR_PRINT("FlashMap::Format() - Chip erase finished\n");
+
+    uint8_t buf[SECTOR_SIZE_BYTES] = { 0 };
+
+    uint8_t num_maps = NUM_MAPS;
+
+    uint8_t *ptr = buf;
+    ptr = BufPut(ptr, (void *)&MAGIC_NUMBER, sizeof(MAGIC_NUMBER));
+    ptr = BufPut(ptr, (void *)&num_maps, sizeof(num_maps));
+    ptr = BufPut(ptr, (void *)&NUM_SECTORS_PER_MAP, sizeof(NUM_SECTORS_PER_MAP));
+
+    uint8_t crc = CRC8(buf, ptr - buf);
+    BufPut(ptr, (void *)&crc, sizeof(crc));
+
+    SOAR_PRINT("FlashMap::Format() - Writing sector 0\n");
+    MX66xxQSPI_WriteSector(buf, 0, 0, SECTOR_SIZE_BYTES);
+    SOAR_PRINT("FlashMap::Format() - Finished writing sector 0\n");
 
     mutex.Unlock();
 }
@@ -101,9 +136,13 @@ uint32_t FlashMap::NewSector(void) {
 	h *= 0xc2b2ae35;
 	h ^= h >> 16;
 
-    return h % NUM_DATA_SECTORS;
+    return h % NUM_DATA_SECTORS_PHYSICAL;
 }
 
 constexpr size_t FlashMap::MapOffset(map_label_e map) {
     return 1 + static_cast<size_t>(map) * NUM_SECTORS_PER_MAP;
+}
+
+static uint8_t *BufPut(uint8_t *buf, void *src, size_t n) {
+    return (uint8_t *)memcpy(buf, src, n) + n;
 }

@@ -19,6 +19,7 @@
 
 #include "Mutex.hpp"
 #include "BitArray.hpp"
+#include "CircularBuffer.hpp"
 
 #include <stdint.h>
 #include <atomic>
@@ -70,7 +71,7 @@ private:
      * Currently we have:
      *  - Array of physical_sector (16 bits)
      *  - Array of is_free (1 bit)
-     *  - Array of is_dirty (1 bit)
+     *  - Array of is_stale (1 bit)
      */
     static constexpr uint32_t CLASS_BITS_PER_SECTOR = 18;
 
@@ -102,43 +103,73 @@ private:
         LOG_SECTOR_OFFSET + NUM_LOG_SECTORS;
 
     /**
-     * The number of available sectors for data storage. Used for the index of
+     * The number of data sectors to reserve as empty space to increase
+     * performance with wear leveling.
+     */
+    static constexpr size_t NUM_OVERPROVISIONED_SECTORS = 0;
+
+    /**
+     * The number of physical sectors used for data storage.
+     */
+    static constexpr size_t NUM_DATA_SECTORS_PHYSICAL =
+        NUM_PHYSICAL_SECTORS -
+        DATA_SECTOR_OFFSET;
+
+    /**
+     * The number of user-indexable logical sectors for data storage. Used for the index of
      * logical sectors and their physical sector equivalents.
      */
-    static constexpr size_t NUM_DATA_SECTORS =
-        NUM_PHYSICAL_SECTORS - DATA_SECTOR_OFFSET;
+    static constexpr size_t NUM_DATA_SECTORS_LOGICAL =
+        NUM_DATA_SECTORS_PHYSICAL - NUM_OVERPROVISIONED_SECTORS;
 
     /**
      * Physical sector associated with the logical index. Has 0 if there is
      * currently no association.
      * Indexed by logical sector.
      */
-    std::atomic_uint16_t physical_sector[NUM_DATA_SECTORS];
+    std::atomic_uint16_t physical_sector[NUM_DATA_SECTORS_LOGICAL];
 
     /**
      * Flag that marks whether a physical sector is currently referenced by a
      * logical sector.
      * Indexed by physical sector.
      */
-    BitArray<NUM_DATA_SECTORS> is_free;
+    BitArray<NUM_DATA_SECTORS_PHYSICAL> is_free;
 
     /**
-     * Flag that marks whether the sector sector needs to be erased.
+     * Flag that marks whether the sector sector contains stale data and needs
+     * to be erased.
      * Indexed by physical sector.
      */
-    BitArray<NUM_DATA_SECTORS> is_dirty;
+    BitArray<NUM_DATA_SECTORS_PHYSICAL> is_stale;
+
+    /**
+     * A queue used for maintaining near round-robin distribution when selecting
+     * a physical sector to write to.
+     * Indexed by physical sector.
+     */
+    CircularBuffer<std::atomic_uint16_t, NUM_DATA_SECTORS_PHYSICAL> sector_seq;
+
+    /**
+     * Indicates which copy of the map is currently being use. Swaps every time
+     * the logs are commited to the map.
+     */
+    map_label_e cur_map;
+
+    /**
+     * The next index in the log sectors where a log must be written.
+     */
+    std::atomic_size_t log_idx;
 
     // Global variables
     bool initialized = false;
     Mutex mutex;
 
-    map_label_e cur_map;
-    uint32_t seq_number;
-    size_t log_idx;
-
 public:
     static FlashMap& Inst(void);
     void Init(void);
+    void InitSequence(void);
+    void Format(void);
     void Trim(uint32_t timeout_ms);
 private:
     FlashMap(void);
