@@ -13,14 +13,8 @@
 #include "UARTTask.hpp"
 #include "CubeTask.hpp"
 #include "DebugTask.hpp"
-//#include "Radio/RadioTask.hpp"
 #include "FSBProtocolTask.hpp"
 #include "CommandCenterTask.hpp"
-//#include "IMUTask.hpp"
-//#include "LSM6DSOTask.hpp"
-//#include "mmc5983Task.hpp"
-//#include "BaroTask07.hpp"
-//#include "BaroTask11.hpp"
 #include "LoggingTask.hpp"
 #include "FlashTask.hpp"
 
@@ -32,30 +26,21 @@ namespace Driver {
     UARTDriver uart5(UART5);
 }
 
+extern "C" {
+    #include "lwip.h"
+}
+
 /* Interface Functions ------------------------------------------------------------*/
 /**
  * @brief Main function interface, called inside main.cpp before os initialization takes place.
 */
 void run_main() {
+    MX_LWIP_Init();
+    
     // Init Tasks
 	UARTTask::Inst().InitTask();
 	CubeTask::Inst().InitTask();
 	DebugTask::Inst().InitTask();
-	// RadioTask and FSBProtocolTask both receive on UART::RADIO. Use the protobuf
-	// protocol task as the GUI command ingress for the FSB.
-	//RadioTask::Inst().InitTask();
-//	FSBProtocolTask::Inst().InitTask();
-//	CommandCenterTask::Inst().InitTask();
-//	FlashTask::Inst().InitTask();
-
-	//IMUTask::Inst().InitTask();
-
-	//LSM6DSOTask::Inst().InitTask();
-    //MMC5983MATask::Inst().InitTask();
-    //BaroTask07::Inst().InitTask();
-    //BaroTask11::Inst().InitTask();
-    //LoggingTask::Inst().InitTask();
-
 
     // Print System Boot Info : Warning, don't queue more than 10 prints before scheduler starts
     SOAR_PRINT("\n-- CUBE SYSTEM --\n");
@@ -66,7 +51,6 @@ void run_main() {
     // Guidelines:
     // - Be CAREFUL with race conditions after osKernelStart
     // - All uses of new and delete should be closely monitored after this point
-
 
     osKernelStart();
 

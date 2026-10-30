@@ -15,6 +15,8 @@
 #include "stm32h7xx_hal.h"
 #include "FlashTask.hpp"
 #include "FSBProtocolTask.hpp"
+#include "KSZ9893R.hpp"
+#include "main.h"
 
 // External Tasks (to send debug commands to)
 
@@ -25,6 +27,8 @@
 /* Constants -----------------------------------------------------------------*/
 constexpr uint8_t DEBUG_TASK_PERIOD = 100;
 extern I2C_HandleTypeDef hi2c2;
+extern SPI_HandleTypeDef hspi2;
+extern ETH_HandleTypeDef heth;
 
 /* Variables -----------------------------------------------------------------*/
 
@@ -108,68 +112,128 @@ void DebugTask::HandleDebugMessage(const char *msg)
                xPortGetMinimumEverFreeHeapSize());
     SOAR_PRINT("Debug Task Runtime  \t: %d ms\n\n",
                TICKS_TO_MS(xTaskGetTickCount()));
-  }
-//  else if (strcmp(msg, "imu1") == 0)
-//  {
-//
-//    SOAR_PRINT("Debug Imu 32G single sample");
-//    Command cmd(DATA_COMMAND, IMUTask::IMU_SAMPLE_AND_LOG);
-//    IMUTask::Inst().GetEventQueue()->Send(cmd);
-//  }
-//  else if (strcmp(msg, "imu1loop") == 0)
-//  {
-//
-//    SOAR_PRINT("Debug Imu 32G continuous read start");
-//    Command cmd(DATA_COMMAND, IMUTask::IMU_START_CONTINUOUS_PRINT);
-//    IMUTask::Inst().GetEventQueue()->Send(cmd);
-//  }
-//  else if (strcmp(msg, "imu1stop") == 0)
-//  {
-//
-//    SOAR_PRINT("Debug Imu 32G continuous read stop");
-//    Command cmd(DATA_COMMAND, IMUTask::IMU_STOP_CONTINUOUS_PRINT);
-//    IMUTask::Inst().GetEventQueue()->Send(cmd);
-//  }
-//  else if (strcmp(msg, "imu2") == 0)
-//  {
-//
-//    SOAR_PRINT("Debug Imu 16G single sample");
-//    Command cmd(DATA_COMMAND, LSM6DSOTask::IMU_SAMPLE_AND_LOG);
-//    LSM6DSOTask::Inst().GetEventQueue()->Send(cmd);
-//  }
-//  else if (strcmp(msg, "imu2loop") == 0)
-//  {
-//
-//    SOAR_PRINT("Debug Imu 16G continuous read start");
-//    Command cmd(DATA_COMMAND, LSM6DSOTask::IMU_START_CONTINUOUS_PRINT);
-//    LSM6DSOTask::Inst().GetEventQueue()->Send(cmd);
-//  }
-//  else if (strcmp(msg, "imu2stop") == 0)
-//  {
-//
-//    SOAR_PRINT("Debug Imu 16G continuous read stop");
-//    Command cmd(DATA_COMMAND, LSM6DSOTask::IMU_STOP_CONTINUOUS_PRINT);
-//    LSM6DSOTask::Inst().GetEventQueue()->Send(cmd);
-//  }
+  } 
 
-//  else if (strcmp(msg, "baro1") == 0)
-//  {
-//    SOAR_PRINT("Debug Baro07 read");
-//    Command cmd(DATA_COMMAND, BARO07_SAMPLE_AND_LOG);
-//    BaroTask07::Inst().GetEventQueue()->Send(cmd);
-//  }
-//  else if (strcmp(msg, "baro2") == 0)
-//  {
-//    SOAR_PRINT("Debug Baro11 read");
-//    Command cmd(DATA_COMMAND, BARO11_SAMPLE_AND_LOG);
-//    BaroTask11::Inst().GetEventQueue()->Send(cmd);
-//  }
-//  else if (strcmp(msg, "mag") == 0)
-//  {
-//    SOAR_PRINT("Debug mag read");
-//    Command cmd(DATA_COMMAND, MMC5983MATask::MMC_CMD_ENABLE_LOG);
-//    MMC5983MATask::Inst().GetEventQueue()->Send(cmd);
-//  }
+
+
+
+
+
+
+
+
+
+
+  else if (strcmp(msg, "switch") == 0) {
+    uint8_t ksz_id[4] = {0};
+    HAL_StatusTypeDef ksz_st = ksz9893::readReg(&hspi2, CS_SWITCH_GPIO_Port, CS_SWITCH_Pin,
+                                                0x0000, ksz_id, sizeof(ksz_id));
+    SOAR_PRINT("KSZ9893R read status: %d, ID bytes: %02X %02X %02X %02X\n",
+               (int)ksz_st, ksz_id[0], ksz_id[1], ksz_id[2], ksz_id[3]);
+
+    for (uint8_t addr = 1; addr <= 3; ++addr) {
+        uint16_t id1 = 0, id2 = 0, status = 0;
+
+        
+        HAL_GPIO_WritePin(CS_SWITCH_GPIO_Port, CS_SWITCH_Pin, GPIO_PIN_RESET);
+        HAL_Delay(300);
+        HAL_StatusTypeDef st1 = ksz9893::readPhyRegSpi(&hspi2, CS_SWITCH_GPIO_Port, CS_SWITCH_Pin, addr, 2, &id1);
+        HAL_StatusTypeDef st2 = ksz9893::readPhyRegSpi(&hspi2, CS_SWITCH_GPIO_Port, CS_SWITCH_Pin, addr, 3, &id2);
+        HAL_StatusTypeDef st3 = ksz9893::readPhyRegSpi(&hspi2, CS_SWITCH_GPIO_Port, CS_SWITCH_Pin, addr, 1, &status);
+        HAL_Delay(3000);
+        HAL_GPIO_WritePin(CS_SWITCH_GPIO_Port, CS_SWITCH_Pin, GPIO_PIN_SET);
+
+        SOAR_PRINT(
+            "PHY addr=%02u | "
+            "ID1=%04X (HAL=%d) | "
+            "ID2=%04X (HAL=%d) | "
+            "STATUS=%04X (HAL=%d)\n",
+            addr, id1, st1, id2, st2, status, st3
+        );
+
+        if (st1 != HAL_OK || st2 != HAL_OK || st3 != HAL_OK) {
+            SOAR_PRINT("  -> HAL read failure\n");
+            continue;
+        }
+
+        if (id1 == 0xFFFF && id2 == 0xFFFF) {
+            SOAR_PRINT("  -> Invalid IDs: no valid PHY response detected\n");
+            continue;
+        }
+
+        if (id1 == 0x0000 && id2 == 0x0000) {
+            SOAR_PRINT("  -> Invalid IDs: both identifiers are zero\n");
+            continue;
+        }
+
+        SOAR_PRINT("  -> Nontrivial PHY ID detected\n");
+
+        if (status == 0xFFFF) {
+            SOAR_PRINT("  -> Status invalid: all bits are set\n");
+        } else {
+            SOAR_PRINT("  -> Link: %s\n",
+                       (status & 0x0004) ? "UP" : "DOWN");
+        }
+    }
+}
+
+
+//   else if (strcmp(msg, "switch") == 0) {
+//     // uint8_t ksz_id[4] = {0};
+//     // HAL_StatusTypeDef ksz_st = ksz9893::readReg(&hspi2, CS_SWITCH_GPIO_Port, CS_SWITCH_Pin,
+//     //                                             0x0000, ksz_id, sizeof(ksz_id));
+//     // SOAR_PRINT("KSZ9893R read status: %d, ID bytes: %02X %02X %02X %02X\n",
+//     //            (int)ksz_st, ksz_id[0], ksz_id[1], ksz_id[2], ksz_id[3]);
+
+
+//     for (uint8_t addr = 0; addr < 32; ++addr) {
+//     uint16_t id1 = 0, id2 = 0, status = 0;
+
+//     HAL_StatusTypeDef st1 = ksz9893::readPhyReg(&heth, addr, 2, &id1);
+//     HAL_StatusTypeDef st2 = ksz9893::readPhyReg(&heth, addr, 3, &id2);
+//     HAL_StatusTypeDef st3 = ksz9893::readPhyReg(&heth, addr, 1, &status);
+
+//     SOAR_PRINT(
+//         "PHY addr=%02u | "
+//         "ID1=%04X (HAL=%d) | "
+//         "ID2=%04X (HAL=%d) | "
+//         "STATUS=%04X (HAL=%d)\n",
+//         addr, id1, st1, id2, st2, status, st3
+//     );
+
+//     if (st1 != HAL_OK || st2 != HAL_OK || st3 != HAL_OK) {
+//         SOAR_PRINT("  -> HAL read failure\n");
+//         continue;
+//     }
+
+//     if (id1 == 0xFFFF && id2 == 0xFFFF) {
+//         SOAR_PRINT("  -> Invalid IDs: no valid PHY response detected\n");
+//         continue;
+//     }
+
+//     if (id1 == 0x0000 && id2 == 0x0000) {
+//         SOAR_PRINT("  -> Invalid IDs: both identifiers are zero\n");
+//         continue;
+//     }
+
+//     SOAR_PRINT("  -> Nontrivial PHY ID detected\n");
+
+//     if (status == 0xFFFF) {
+//         SOAR_PRINT("  -> Status invalid: all bits are set\n");
+//     } else {
+//         SOAR_PRINT("  -> Link: %s\n",
+//                    (status & 0x0004) ? "UP" : "DOWN");
+//     }
+// }
+
+
+//   }
+
+
+
+
+
+
   else if (strcmp(msg, "flash_test") == 0)
   {
     SOAR_PRINT("Debug: Triggering flash tests\n");

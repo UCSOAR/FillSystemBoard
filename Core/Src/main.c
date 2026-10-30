@@ -18,8 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "string.h"
 #include "cmsis_os.h"
-#include "lwip.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -42,8 +42,28 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+#if defined ( __ICCARM__ ) /*!< IAR Compiler */
+#pragma location=0x30000000
+ETH_DMADescTypeDef  DMARxDscrTab[ETH_RX_DESC_CNT]; /* Ethernet Rx DMA Descriptors */
+#pragma location=0x30000080
+ETH_DMADescTypeDef  DMATxDscrTab[ETH_TX_DESC_CNT]; /* Ethernet Tx DMA Descriptors */
+
+#elif defined ( __CC_ARM )  /* MDK ARM Compiler */
+
+__attribute__((at(0x30000000))) ETH_DMADescTypeDef  DMARxDscrTab[ETH_RX_DESC_CNT]; /* Ethernet Rx DMA Descriptors */
+__attribute__((at(0x30000080))) ETH_DMADescTypeDef  DMATxDscrTab[ETH_TX_DESC_CNT]; /* Ethernet Tx DMA Descriptors */
+
+#elif defined ( __GNUC__ ) /* GNU Compiler */
+
+ETH_DMADescTypeDef DMARxDscrTab[ETH_RX_DESC_CNT] __attribute__((section(".RxDescripSection"))); /* Ethernet Rx DMA Descriptors */
+ETH_DMADescTypeDef DMATxDscrTab[ETH_TX_DESC_CNT] __attribute__((section(".TxDescripSection")));   /* Ethernet Tx DMA Descriptors */
+#endif
+
+ETH_TxPacketConfig TxConfig;
 
 CRC_HandleTypeDef hcrc;
+
+ETH_HandleTypeDef heth;
 
 FDCAN_HandleTypeDef hfdcan1;
 
@@ -77,6 +97,7 @@ static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
+static void MX_ETH_Init(void);
 void StartDefaultTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
@@ -134,6 +155,7 @@ int main(void)
   MX_TIM4_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
+  MX_ETH_Init();
   /* USER CODE BEGIN 2 */
   __enable_irq();
 
@@ -292,6 +314,55 @@ static void MX_CRC_Init(void)
 }
 
 /**
+  * @brief ETH Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ETH_Init(void)
+{
+
+  /* USER CODE BEGIN ETH_Init 0 */
+
+  /* USER CODE END ETH_Init 0 */
+
+   static uint8_t MACAddr[6];
+
+  /* USER CODE BEGIN ETH_Init 1 */
+
+  /* USER CODE END ETH_Init 1 */
+  heth.Instance = ETH;
+  MACAddr[0] = 0x00;
+  MACAddr[1] = 0x80;
+  MACAddr[2] = 0xE1;
+  MACAddr[3] = 0x00;
+  MACAddr[4] = 0x00;
+  MACAddr[5] = 0x00;
+  heth.Init.MACAddr = &MACAddr[0];
+  heth.Init.MediaInterface = HAL_ETH_RMII_MODE;
+  heth.Init.TxDesc = DMATxDscrTab;
+  heth.Init.RxDesc = DMARxDscrTab;
+  heth.Init.RxBuffLen = 1536;
+
+  /* USER CODE BEGIN MACADDRESS */
+
+  /* USER CODE END MACADDRESS */
+
+  if (HAL_ETH_Init(&heth) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  memset(&TxConfig, 0 , sizeof(ETH_TxPacketConfig));
+  TxConfig.Attributes = ETH_TX_PACKETS_FEATURES_CSUM | ETH_TX_PACKETS_FEATURES_CRCPAD;
+  TxConfig.ChecksumCtrl = ETH_CHECKSUM_IPHDR_PAYLOAD_INSERT_PHDR_CALC;
+  TxConfig.CRCPadCtrl = ETH_CRC_PAD_INSERT;
+  /* USER CODE BEGIN ETH_Init 2 */
+
+  /* USER CODE END ETH_Init 2 */
+
+}
+
+/**
   * @brief FDCAN1 Initialization Function
   * @param None
   * @retval None
@@ -398,11 +469,11 @@ static void MX_SPI2_Init(void)
   hspi2.Instance = SPI2;
   hspi2.Init.Mode = SPI_MODE_MASTER;
   hspi2.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi2.Init.DataSize = SPI_DATASIZE_4BIT;
+  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi2.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -416,7 +487,7 @@ static void MX_SPI2_Init(void)
   hspi2.Init.MasterInterDataIdleness = SPI_MASTER_INTERDATA_IDLENESS_00CYCLE;
   hspi2.Init.MasterReceiverAutoSusp = SPI_MASTER_RX_AUTOSUSP_DISABLE;
   hspi2.Init.MasterKeepIOState = SPI_MASTER_KEEP_IO_STATE_DISABLE;
-  hspi2.Init.IOSwap = SPI_IO_SWAP_DISABLE;
+  hspi2.Init.IOSwap = SPI_IO_SWAP_ENABLE;
   if (HAL_SPI_Init(&hspi2) != HAL_OK)
   {
     Error_Handler();
@@ -818,6 +889,9 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(CS_SWITCH_GPIO_Port, CS_SWITCH_Pin, GPIO_PIN_RESET);
+
   /*Configure GPIO pins : PB0 PB1 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
@@ -831,6 +905,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.Alternate = GPIO_AF10_OTG1_FS;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : CS_SWITCH_Pin */
+  GPIO_InitStruct.Pin = CS_SWITCH_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(CS_SWITCH_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
   /* USER CODE END MX_GPIO_Init_2 */
@@ -849,8 +930,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
-  /* init code for LWIP */
-  MX_LWIP_Init();
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for(;;)
