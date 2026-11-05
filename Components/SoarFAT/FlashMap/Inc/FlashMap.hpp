@@ -80,9 +80,9 @@ private:
      *  - Array of physical_sector (16 bits)
      *  - Array of is_free (1 bit)
      *  - Array of is_stale (1 bit)
-     *  - uint16_t CircularBuffer of sector_seq (16 bit)
+     *  - uint32_t CircularBuffer of sector_seq (32 bit)
      */
-    static constexpr uint32_t CLASS_BITS_PER_SECTOR = 34;
+    static constexpr uint32_t CLASS_BITS_PER_SECTOR = 50;
 
     /**
      * The number of sectors at the start of flash allocated for the sector

@@ -219,3 +219,5 @@ constexpr size_t FlashMap::MapOffset(map_label_e map) {
 static inline uint8_t *BufPut(uint8_t *buf, void *src, size_t n) {
     return (uint8_t *)memcpy(buf, src, n) + n;
 }
+
+//static volatile FlashMap& x = FlashMap::Inst();
