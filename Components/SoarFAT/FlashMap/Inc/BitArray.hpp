@@ -17,6 +17,7 @@
  ************************************/
 
 #include <atomic>
+#include <stddef.h>
 
 /************************************
  * MACROS AND DEFINES
