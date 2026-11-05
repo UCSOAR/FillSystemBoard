@@ -32,6 +32,7 @@
  ************************************/
 
 static uint8_t *BufPut(uint8_t *buf, void *src, size_t n);
+#define BufPush(buf, src) BufPut(buf, (void *)&src, sizeof(src))
 
 /************************************
  * FUNCTION DEFINITIONS
@@ -91,16 +92,17 @@ void FlashMap::Format(void) {
 
     // Write static metadata to physical sector 0 of the flash for verification.
     uint8_t *ptr = buf;
-    ptr = BufPut(ptr, (void *)&MAGIC_NUMBER,                sizeof(MAGIC_NUMBER));
-    ptr = BufPut(ptr, (void *)&NUM_PHYSICAL_SECTORS,        sizeof(NUM_PHYSICAL_SECTORS));
-    ptr = BufPut(ptr, (void *)&num_maps,                    sizeof(num_maps));
-    ptr = BufPut(ptr, (void *)&NUM_SECTORS_PER_MAP,         sizeof(NUM_SECTORS_PER_MAP));
-    ptr = BufPut(ptr, (void *)&NUM_LOG_SECTORS,             sizeof(NUM_LOG_SECTORS));
-    ptr = BufPut(ptr, (void *)&NUM_DATA_SECTORS_PHYSICAL,   sizeof(NUM_DATA_SECTORS_PHYSICAL));
-    ptr = BufPut(ptr, (void *)&NUM_OVERPROVISIONED_SECTORS, sizeof(NUM_OVERPROVISIONED_SECTORS));
+    ptr = BufPush(ptr, MAGIC_NUMBER);
+    ptr = BufPush(ptr, MAGIC_NUMBER);
+    ptr = BufPush(ptr, NUM_PHYSICAL_SECTORS);
+    ptr = BufPush(ptr, num_maps);
+    ptr = BufPush(ptr, NUM_SECTORS_PER_MAP);
+    ptr = BufPush(ptr, NUM_LOG_SECTORS);
+    ptr = BufPush(ptr, NUM_DATA_SECTORS_PHYSICAL);
+    ptr = BufPush(ptr, NUM_OVERPROVISIONED_SECTORS);
 
     uint8_t crc = CRC8(buf, ptr - buf);
-    BufPut(ptr, (void *)&crc, sizeof(crc));
+    BufPush(ptr, crc);
 
     SOAR_PRINT("FlashMap::Format() - Writing sector 0\n");
     MX66xxQSPI_WriteSector(buf, 0, 0, SECTOR_SIZE_BYTES);

@@ -17,7 +17,6 @@
  * INCLUDES
  ************************************/
 
-#include "Mutex.hpp"
 #include "BitArray.hpp"
 #include "CircularBuffer.hpp"
 
