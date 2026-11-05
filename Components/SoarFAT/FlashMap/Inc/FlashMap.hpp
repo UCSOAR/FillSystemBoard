@@ -53,6 +53,15 @@ private:
     } map_label_e;
 
     /**
+     * Indicates the operation performed on the flash chip for the purpose of
+     * logging.
+     */
+    typedef enum log_type_e {
+        LOG_WRITE,
+        LOG_ERASE,
+    } log_type_e;
+
+    /**
      * Number stored in sector zero to verify if flash has been formatted.
      */
     static constexpr uint32_t MAGIC_NUMBER = 0xAFA7FACE;
@@ -71,8 +80,9 @@ private:
      *  - Array of physical_sector (16 bits)
      *  - Array of is_free (1 bit)
      *  - Array of is_stale (1 bit)
+     *  - uint16_t CircularBuffer of sector_seq (16 bit)
      */
-    static constexpr uint32_t CLASS_BITS_PER_SECTOR = 18;
+    static constexpr uint32_t CLASS_BITS_PER_SECTOR = 34;
 
     /**
      * The number of sectors at the start of flash allocated for the sector
@@ -87,7 +97,7 @@ private:
      * The number of sectors to using for tracking changes made to the map
      * before committing them.
      */
-    static constexpr size_t NUM_LOG_SECTORS = 1;
+    static constexpr size_t NUM_LOG_SECTORS = 512;
 
     /**
      * The sector number of the first log sector.
@@ -147,7 +157,7 @@ private:
      * a physical sector to write to.
      * Indexed by physical sector.
      */
-    CircularBuffer<std::atomic_uint16_t, NUM_DATA_SECTORS_PHYSICAL> sector_seq;
+    CircularBuffer<std::atomic_uint32_t, NUM_DATA_SECTORS_PHYSICAL> sector_seq;
 
     /**
      * Indicates which copy of the map is currently being use. Swaps every time
@@ -158,7 +168,7 @@ private:
     /**
      * The next index in the log sectors where a log must be written.
      */
-    std::atomic_size_t log_idx;
+    std::atomic_uint16_t log_idx;
 
     // Global variables
     bool initialized = false;
@@ -181,6 +191,12 @@ public:
      * Erases the flash chip and writes the required static metadata to sector 0.
      */
     void Format(void);
+
+    /**
+     * Checks that the flash chip is formatted correctly by comparing the actual
+     * and expected Sector 0 bytes.
+     */
+    bool IsValid(void);
 private:
     FlashMap(void) { };
 
@@ -193,7 +209,13 @@ private:
      * Finds a new random physical sector using the MurmurHash3 mixer finalizer.
      * See https://en.wikipedia.org/wiki/MurmurHash
      */
-    static uint32_t NewSector(void);
+    uint32_t NewSector(void);
+
+    int WriteMapDatum(size_t byte_offset, size_t datum_size_bytes, uint32_t datum);
+
+    int ReadMapDatum(size_t byte_offset, size_t datum_size_bytes, void *ret);
+
+    void WriteInitialMap(map_label_e map);
 
     /**
      * Returns the physical sector number of the starting sector of a map.

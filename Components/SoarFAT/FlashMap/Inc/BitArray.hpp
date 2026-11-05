@@ -49,14 +49,14 @@ public:
     /**
      * Atomically sets the nth bit.
      */
-    void set(size_t n) {
+    void Set(size_t n) {
         storage[n / 32].fetch_or(0b1U << (n % 32), std::memory_order_relaxed);
     }
 
     /**
      * Atomically resets the nth bit.
      */
-    void reset(size_t n) {
+    void Reset(size_t n) {
         storage[n / 32].fetch_and(~(0b1U << (n % 32)), std::memory_order_relaxed);
     }
 
@@ -65,6 +65,10 @@ public:
      */
     uint32_t operator[] (size_t i) const {
         return (uint32_t)storage[i / 32] & (0b1U << (i % 32));
+    }
+
+    constexpr size_t BackingArraySize(void) {
+        return (N + 31) / 32;
     }
 };
 
