@@ -203,6 +203,7 @@ void FlashMap::WriteInitialMap(map_label_e map) {
         cur_byte += 4;
     }
 
+    // Write sector sequence number queue.
     uint32_t seq = 0;
     for (size_t i = NUM_DATA_SECTORS_PHYSICAL; i > 0; i--) {
         WriteMapDatum(cur_byte, 4, seq);
