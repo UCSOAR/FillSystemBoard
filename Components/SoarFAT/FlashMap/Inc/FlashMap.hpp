@@ -46,7 +46,7 @@ private:
      * Two separate map sections are stored in the flash to aid with data
      * integrity.
      */
-    typedef enum mab_label_e {
+    typedef enum mab_label_e : uint8_t {
         MAP_A,
         MAP_B,
         NUM_MAPS,
@@ -56,10 +56,19 @@ private:
      * Indicates the operation performed on the flash chip for the purpose of
      * logging.
      */
-    typedef enum log_type_e {
+    typedef enum log_type_e : uint8_t {
         LOG_WRITE,
         LOG_ERASE,
     } log_type_e;
+
+    /**
+     * Each log entry consists of a type, 48 bits of metadata, and an 8 bit CRC.
+     */
+    typedef struct log_entry_s {
+        log_type_e type;
+        uint8_t bytes[6];
+        uint8_t crc;
+    } __attribute__((packed)) log_entry_s;
 
     /**
      * Number stored in sector zero to verify if flash has been formatted.
@@ -80,9 +89,9 @@ private:
      *  - Array of physical_sector (16 bits)
      *  - Array of is_free (1 bit)
      *  - Array of is_stale (1 bit)
-     *  - uint32_t CircularBuffer of sector_seq (32 bit)
+     *  - uint16_t CircularBuffer of sector_seq (16 bit)
      */
-    static constexpr uint32_t CLASS_BITS_PER_SECTOR = 50;
+    static constexpr uint32_t CLASS_BITS_PER_SECTOR = 34;
 
     /**
      * The number of sectors at the start of flash allocated for the sector
@@ -96,8 +105,11 @@ private:
     /**
      * The number of sectors to using for tracking changes made to the map
      * before committing them.
+     * The number of sectors used is to level wear between them and the data
+     * sectors.
      */
-    static constexpr size_t NUM_LOG_SECTORS = 512;
+    static constexpr size_t NUM_LOG_SECTORS = DIV_CEIL(
+        NUM_PHYSICAL_SECTORS, DIV_CEIL(SECTOR_SIZE_BYTES, sizeof(log_entry_s)));
 
     /**
      * The sector number of the first log sector.
@@ -157,7 +169,7 @@ private:
      * a physical sector to write to.
      * Indexed by physical sector.
      */
-    CircularBuffer<std::atomic_uint32_t, NUM_DATA_SECTORS_PHYSICAL> sector_seq;
+    CircularBuffer<std::atomic_uint16_t, NUM_DATA_SECTORS_PHYSICAL> sector_seq;
 
     /**
      * Indicates which copy of the map is currently being use. Swaps every time

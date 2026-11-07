@@ -32,7 +32,7 @@
  ************************************/
 
 static inline uint8_t *BufPut(uint8_t *buf, void *src, size_t n);
-#define BufPush(buf, src) BufPut(buf, (void *)&src, sizeof(src))
+#define BufPush(buf, src) BufPut((buf), (void *)&(src), sizeof(src))
 
 /************************************
  * FUNCTION DEFINITIONS
@@ -203,12 +203,10 @@ void FlashMap::WriteInitialMap(map_label_e map) {
         cur_byte += 4;
     }
 
-    // Write sector sequence number queue.
-    uint32_t seq = 0;
-    for (size_t i = NUM_DATA_SECTORS_PHYSICAL; i > 0; i--) {
-        WriteMapDatum(cur_byte, 4, seq);
-        cur_byte += 4;
-        seq++;
+    // Write sector initial sector queue
+    for (size_t i = 0; i < NUM_DATA_SECTORS_PHYSICAL; i--) {
+        WriteMapDatum(cur_byte, 2, i);
+        cur_byte += 2;
     }
 }
 
