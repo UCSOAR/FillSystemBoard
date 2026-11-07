@@ -18,6 +18,7 @@
 #include "mx66xx_qspi.hpp"
 
 #include <cstring>
+#include <stdio.h>
 
 /************************************
  * PRIVATE MACROS AND DEFINES
@@ -27,12 +28,17 @@
  * VARIABLES
  ************************************/
 
+uint8_t FlashMap::buf[SECTOR_SIZE_BYTES] = { 0 };
+
 /************************************
  * FUNCTION DECLARATIONS
  ************************************/
 
 static inline uint8_t *BufPut(uint8_t *buf, void *src, size_t n);
 #define BufPush(buf, src) BufPut((buf), (void *)&(src), sizeof(src))
+
+static void MX66xxQSPI_ReadSector_Chunked(uint8_t *pBuffer, uint32_t Sector_Address, uint32_t OffsetInByte, uint32_t NumByteToRead);
+static void MX66xxQSPI_WriteSector_Chunked(uint8_t *pBuffer, uint32_t Sector_Address, uint32_t OffsetInByte, uint32_t NumByteToWrite);
 
 /************************************
  * FUNCTION DEFINITIONS
@@ -44,8 +50,6 @@ FlashMap& FlashMap::Inst(void) {
 }
 
 void FlashMap::Init(void) {
-    InitSequence();
-
     initialized = false;
 
     if (!MX66xxQSPI_Init()) {
@@ -69,27 +73,13 @@ void FlashMap::Init(void) {
     initialized = true;
 }
 
-void FlashMap::InitSequence(void) {
-    MX66xxQSPI_ReleaseFromDeepPowerDown();
-    MX66xxQSPI_RSTEN();
-    MX66xxQSPI_RST();
-    MX66xxQSPI_EQIO_1LINE();
-    MX66xxQSPI_EN4B();
-}
-
 void FlashMap::Format(void) {
-    InitSequence();
-
     if (!MX66xxQSPI_Init()) {
         SOAR_PRINT("FlashMap::Format() - MX66 init failed\n");
         return;
     }
 
-    SOAR_PRINT("FlashMap::Format() - Chip erase started\n");
-    MX66xxQSPI_EraseChip();
-    SOAR_PRINT("FlashMap::Format() - Chip erase finished\n");
-
-    uint8_t buf[SECTOR_SIZE_BYTES] = { 0 };
+    //Erase();
 
     uint8_t num_maps = NUM_MAPS;
 
@@ -112,19 +102,14 @@ void FlashMap::Format(void) {
 
     // Write base metadata the the map sector
     SOAR_PRINT("FlashMap::Format() - Writing map metadata\n");
-    WriteInitialMap(MAP_A);
-    WriteInitialMap(MAP_B);
+    //WriteInitialMap(MAP_A);
+    //WriteInitialMap(MAP_B);
     SOAR_PRINT("FlashMap::Format() - Finished writing map metadata\n");
 }
 
 bool FlashMap::IsValid(void) {
-    if (!initialized) {
-        SOAR_PRINT("FlashMap::IsValid() - MX66 not initialized\n");
-        return false;
-    }
-
-    uint8_t buf[SECTOR_SIZE_BYTES];
-    MX66xxQSPI_ReadSector(buf, 0, 0, SECTOR_SIZE_BYTES);
+    MX66xxQSPI_ReadSector(buf, 0, 0, SECTOR_SIZE_BYTES); 
+    PrintBuf();
 
     uint32_t read_magic_number = (buf[3] << 24) |
                                  (buf[2] << 16) |
@@ -139,6 +124,12 @@ bool FlashMap::IsValid(void) {
     }
 
     return true;
+}
+
+void FlashMap::Erase(void) {
+    SOAR_PRINT("FlashMap::Erase() - Chip erase started\n");
+    MX66xxQSPI_EraseChip();
+    SOAR_PRINT("FlashMap::Erase() - Chip erase finished\n");
 }
 
 uint32_t FlashMap::NewSector(void) {
@@ -210,6 +201,16 @@ void FlashMap::WriteInitialMap(map_label_e map) {
     }
 }
 
+void FlashMap::PrintBuf(void) {
+    size_t i = 0;
+    while (i < SECTOR_SIZE_BYTES) {
+        for (size_t j = 0; j < 32; j++) {
+            SOAR_PRINT("%02X ", buf[i++]);
+        }
+        SOAR_PRINT("\n");
+    }
+}
+
 constexpr size_t FlashMap::MapOffset(map_label_e map) {
     return 1 + static_cast<size_t>(map) * NUM_SECTORS_PER_MAP;
 }
@@ -218,4 +219,28 @@ static inline uint8_t *BufPut(uint8_t *buf, void *src, size_t n) {
     return (uint8_t *)memcpy(buf, src, n) + n;
 }
 
-//static volatile FlashMap& x = FlashMap::Inst();
+static void MX66xxQSPI_ReadSector_Chunked(uint8_t *pBuffer, uint32_t Sector_Address, uint32_t OffsetInByte, uint32_t NumByteToRead) {
+    uint32_t num_chunks = NumByteToRead / 256;
+    uint32_t remaining = NumByteToRead % 256;
+
+    uint32_t i;
+    for (i = 0; i < num_chunks * 256; i += 256) {
+        MX66xxQSPI_ReadSector(pBuffer + i, Sector_Address + (i / SECTOR_SIZE_BYTES), i % SECTOR_SIZE_BYTES, 256);
+    }
+
+    MX66xxQSPI_ReadSector(pBuffer + i, Sector_Address + (i / SECTOR_SIZE_BYTES), i % SECTOR_SIZE_BYTES, remaining);
+}
+
+static void MX66xxQSPI_WriteSector_Chunked(uint8_t *pBuffer, uint32_t Sector_Address, uint32_t OffsetInByte, uint32_t NumByteToWrite) {
+    uint32_t num_chunks = NumByteToWrite / 256;
+    uint32_t remaining = NumByteToWrite % 256;
+
+    uint32_t i;
+    for (i = 0; i < num_chunks * 256; i += 256) {
+        MX66xxQSPI_WriteSector(pBuffer + i, Sector_Address + (i / SECTOR_SIZE_BYTES), i % SECTOR_SIZE_BYTES, 256);
+    }
+
+    if (remaining > 0) {
+        MX66xxQSPI_WriteSector(pBuffer + i, Sector_Address + (i / SECTOR_SIZE_BYTES), i % SECTOR_SIZE_BYTES, remaining);
+    }
+}

@@ -182,6 +182,11 @@ private:
      */
     std::atomic_uint16_t log_idx;
 
+    /**
+     * Buffer used for sector reads/writes
+     */
+    static uint8_t buf[SECTOR_SIZE_BYTES];
+
     // Global variables
     bool initialized = false;
 
@@ -209,13 +214,13 @@ public:
      * and expected Sector 0 bytes.
      */
     bool IsValid(void);
-private:
-    FlashMap(void) { };
 
     /**
-     * Calls the sequence of commands that must be run prior to initialization.
+     * Erases the flash chip.
      */
-    void InitSequence(void);
+    void Erase(void);
+private:
+    FlashMap(void) { };
 
     /**
      * Finds a new random physical sector using the MurmurHash3 mixer finalizer.
@@ -228,6 +233,8 @@ private:
     int ReadMapDatum(size_t byte_offset, size_t datum_size_bytes, void *ret);
 
     void WriteInitialMap(map_label_e map);
+
+    void PrintBuf(void);
 
     /**
      * Returns the physical sector number of the starting sector of a map.
