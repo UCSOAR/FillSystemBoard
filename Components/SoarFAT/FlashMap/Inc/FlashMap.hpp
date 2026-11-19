@@ -19,6 +19,7 @@
 
 #include "BitArray.hpp"
 #include "CircularBuffer.hpp"
+#include "FlashStrategy.hpp"
 
 #include <stdint.h>
 #include <atomic>
@@ -181,6 +182,11 @@ private:
      * The next index in the log sectors where a log must be written.
      */
     std::atomic_uint16_t log_idx;
+
+    /**
+     * The flash strategy to use.
+     */
+    FlashStrategy& strategy;
 
     /**
      * Buffer used for sector reads/writes
