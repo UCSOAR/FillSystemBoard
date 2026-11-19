@@ -79,7 +79,7 @@ void FlashMap::Format(void) {
         return;
     }
 
-    //Erase();
+    Erase();
 
     uint8_t num_maps = NUM_MAPS;
 
@@ -102,8 +102,8 @@ void FlashMap::Format(void) {
 
     // Write base metadata the the map sector
     SOAR_PRINT("FlashMap::Format() - Writing map metadata\n");
-    //WriteInitialMap(MAP_A);
-    //WriteInitialMap(MAP_B);
+    WriteInitialMap(MAP_A);
+    WriteInitialMap(MAP_B);
     SOAR_PRINT("FlashMap::Format() - Finished writing map metadata\n");
 }
 
@@ -117,7 +117,10 @@ bool FlashMap::IsValid(void) {
                                  (buf[0]);
 
     uint8_t read_crc = buf[25];
-    uint8_t calculated_crc = CRC8(buf, 24);
+    uint8_t calculated_crc = CRC8(buf, 25);
+
+    SOAR_PRINT("Read CRC: %02X\n", read_crc);
+    SOAR_PRINT("Caclculated CRC: %02X\n", calculated_crc);
 
     if ((read_magic_number != MAGIC_NUMBER) || (read_crc != calculated_crc)) {
         return false;
