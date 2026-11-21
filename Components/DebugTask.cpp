@@ -13,7 +13,7 @@
 #include "LoggingService.hpp"
 
 #include "stm32h7xx_hal.h"
-#include "FlashTask.hpp"
+//#include "FlashTask.hpp"
 #include "FSBProtocolTask.hpp"
 
 // External Tasks (to send debug commands to)
@@ -173,12 +173,12 @@ void DebugTask::HandleDebugMessage(const char *msg)
   else if (strcmp(msg, "flash_test") == 0)
   {
     SOAR_PRINT("Debug: Triggering flash tests\n");
-    FlashTask::Inst().TriggerTest();
+    //FlashTask::Inst().TriggerTest();
   }
   else if (strcmp(msg, "flash_dump") == 0)
   {
-    Command cmd(TASK_SPECIFIC_COMMAND, FLASH_DUMP);
-    FlashTask::Inst().GetEventQueue()->Send(cmd);
+    //Command cmd(TASK_SPECIFIC_COMMAND, FLASH_DUMP);
+    //FlashTask::Inst().GetEventQueue()->Send(cmd);
   }
   else if (strcmp(msg, "stop_dump") == 0)
   {

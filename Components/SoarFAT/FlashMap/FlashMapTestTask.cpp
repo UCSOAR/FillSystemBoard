@@ -9,8 +9,12 @@
 /************************************
  * INCLUDES
  ************************************/
+
 #include "FlashMapTestTask.hpp"
 #include "FlashMap.hpp"
+
+#include "Flash.hpp"
+#include "FlashMX66XX.hpp"
 #include "SystemDefines.hpp"
 
 /************************************
@@ -62,7 +66,8 @@ void FlashMapTestTask::InitTask()
  */
 void FlashMapTestTask::Run(void * pvParams)
 {
-    FlashMap& map = FlashMap::Inst();
+    static FlashMX66XX& flash = FlashMX66XX::Inst();
+    FlashMap<FlashMX66XX> map(flash);
 
     map.Init();
 

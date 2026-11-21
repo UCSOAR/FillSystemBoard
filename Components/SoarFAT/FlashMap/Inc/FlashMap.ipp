@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file    FlashMap.cpp
+ * @file    FlashMap.ipp
  * @author  Jacob Plourde (Jacobplo)
  * @date    October 24, 2026
  ********************************************************************************
@@ -28,8 +28,6 @@
  * VARIABLES
  ************************************/
 
-uint8_t FlashMap::buf[SECTOR_SIZE_BYTES] = { 0 };
-
 /************************************
  * FUNCTION DECLARATIONS
  ************************************/
@@ -37,31 +35,18 @@ uint8_t FlashMap::buf[SECTOR_SIZE_BYTES] = { 0 };
 static inline uint8_t *BufPut(uint8_t *buf, void *src, size_t n);
 #define BufPush(buf, src) BufPut((buf), (void *)&(src), sizeof(src))
 
-static void MX66xxQSPI_ReadSector_Chunked(uint8_t *pBuffer, uint32_t Sector_Address, uint32_t OffsetInByte, uint32_t NumByteToRead);
-static void MX66xxQSPI_WriteSector_Chunked(uint8_t *pBuffer, uint32_t Sector_Address, uint32_t OffsetInByte, uint32_t NumByteToWrite);
-
 /************************************
  * FUNCTION DEFINITIONS
  ************************************/
 
-FlashMap& FlashMap::Inst(void) {
-    static FlashMap inst;
-    return inst;
-}
-
-void FlashMap::Init(void) {
+template <class F>
+void FlashMap<F>::Init(void) {
     initialized = false;
 
-    if (!MX66xxQSPI_Init()) {
-        SOAR_PRINT("FlashMap::InitFlash() - MX66 init failed\n");
+    if (dev.Init() < 0) {
+        SOAR_PRINT("FlashMap::InitFlash() - init failed\n");
         return;
     }
-
-    uint8_t status = MX66xxQSPI_ReadStatusRegister();
-    SOAR_PRINT("FlashMap::Init() - Status1: 0x%02x\n", status);
-
-    uint32_t id = MX66xxQSPI_QPIReadID();
-    SOAR_PRINT("FlashMap::Init() - MX66 ReadID: 0x%06lx\n", id);
 
     // Read Sector 0 and confirm contents are as expected
     if (!IsValid()) {
@@ -73,15 +58,16 @@ void FlashMap::Init(void) {
     initialized = true;
 }
 
-void FlashMap::Format(void) {
-    if (!MX66xxQSPI_Init()) {
-        SOAR_PRINT("FlashMap::Format() - MX66 init failed\n");
+template <class F>
+void FlashMap<F>::Format(void) {
+    if (dev.Init() < 0) {
+        SOAR_PRINT("FlashMap::Format() - init failed\n");
         return;
     }
 
     Erase();
 
-    uint8_t num_maps = NUM_MAPS;
+    uint8_t num_maps = static_cast<uint8_t>(MapLabel::NumMaps);
 
     // Write static metadata to physical sector 0 of the flash for verification.
     uint8_t *ptr = buf;
@@ -97,18 +83,19 @@ void FlashMap::Format(void) {
     BufPush(ptr, crc);
 
     SOAR_PRINT("FlashMap::Format() - Writing sector 0\n");
-    MX66xxQSPI_WriteSector(buf, 0, 0, SECTOR_SIZE_BYTES);
+    dev.Write(buf, 0, 0, F::SECTOR_SIZE_BYTES);
     SOAR_PRINT("FlashMap::Format() - Finished writing sector 0\n");
 
     // Write base metadata the the map sector
     SOAR_PRINT("FlashMap::Format() - Writing map metadata\n");
-    WriteInitialMap(MAP_A);
-    WriteInitialMap(MAP_B);
+    WriteInitialMap(MapLabel::MapA);
+    WriteInitialMap(MapLabel::MapB);
     SOAR_PRINT("FlashMap::Format() - Finished writing map metadata\n");
 }
 
-bool FlashMap::IsValid(void) {
-    MX66xxQSPI_ReadSector(buf, 0, 0, SECTOR_SIZE_BYTES); 
+template <class F>
+bool FlashMap<F>::IsValid(void) {
+    dev.Read(buf, 0, 0, F::SECTOR_SIZE_BYTES); 
     PrintBuf();
 
     uint32_t read_magic_number = (buf[3] << 24) |
@@ -129,13 +116,15 @@ bool FlashMap::IsValid(void) {
     return true;
 }
 
-void FlashMap::Erase(void) {
+template <class F>
+void FlashMap<F>::Erase(void) {
     SOAR_PRINT("FlashMap::Erase() - Chip erase started\n");
-    MX66xxQSPI_EraseChip();
+    dev.EraseChip();
     SOAR_PRINT("FlashMap::Erase() - Chip erase finished\n");
 }
 
-uint32_t FlashMap::NewSector(void) {
+template <class F>
+uint32_t FlashMap<F>::NewSector(void) {
     uint32_t h = HAL_GetTick();
 
     h ^= h >> 16;
@@ -147,36 +136,39 @@ uint32_t FlashMap::NewSector(void) {
     return h % NUM_DATA_SECTORS_PHYSICAL;
 }
 
-int FlashMap::WriteMapDatum(size_t byte_offset, size_t datum_size_bytes, uint32_t datum) {
-    size_t total_bytes = NUM_SECTORS_PER_MAP * SECTOR_SIZE_BYTES;
+template <class F>
+int FlashMap<F>::WriteMapDatum(size_t byte_offset, size_t datum_size_bytes, uint32_t datum) {
+    size_t total_bytes = NUM_SECTORS_PER_MAP * F::SECTOR_SIZE_BYTES;
     if (byte_offset >= total_bytes) return -1;
 
-    size_t map_sector = byte_offset / SECTOR_SIZE_BYTES;
-    size_t map_offset = byte_offset % SECTOR_SIZE_BYTES;
+    size_t map_sector = byte_offset / F::SECTOR_SIZE_BYTES;
+    size_t map_offset = byte_offset % F::SECTOR_SIZE_BYTES;
 
-    MX66xxQSPI_WriteSector((uint8_t *)&datum, map_sector, map_offset, datum_size_bytes);
+    dev.Write((uint8_t *)&datum, map_sector, map_offset, datum_size_bytes);
 
     return 0;
 }
 
-int FlashMap::ReadMapDatum(size_t byte_offset, size_t datum_size_bytes, void *ret) {
-    size_t total_bytes = NUM_SECTORS_PER_MAP * SECTOR_SIZE_BYTES;
+template <class F>
+int FlashMap<F>::ReadMapDatum(size_t byte_offset, size_t datum_size_bytes, void *ret) {
+    size_t total_bytes = NUM_SECTORS_PER_MAP * F::SECTOR_SIZE_BYTES;
     if (byte_offset >= total_bytes) return -1;
 
-    size_t map_sector = byte_offset / SECTOR_SIZE_BYTES;
-    size_t map_offset = byte_offset % SECTOR_SIZE_BYTES;
+    size_t map_sector = byte_offset / F::SECTOR_SIZE_BYTES;
+    size_t map_offset = byte_offset % F::SECTOR_SIZE_BYTES;
 
-    MX66xxQSPI_ReadSector((uint8_t *)ret, map_sector, map_offset, datum_size_bytes);
+    dev.Read((uint8_t *)ret, map_sector, map_offset, datum_size_bytes);
 
     return 0;
 }
 
-void FlashMap::WriteInitialMap(map_label_e map) {
+template <class F>
+void FlashMap<F>::WriteInitialMap(MapLabel map) {
     size_t map_offset = MapOffset(map);
    
     // Write initial map sequence number
     size_t cur_byte = map_offset;
-    WriteMapDatum(cur_byte, 4, map);
+    WriteMapDatum(cur_byte, 4, static_cast<uint8_t>(map));
     cur_byte += 4;
 
     // Write logical to physical sector mappings to 0.
@@ -204,9 +196,10 @@ void FlashMap::WriteInitialMap(map_label_e map) {
     }
 }
 
-void FlashMap::PrintBuf(void) {
+template <class F>
+void FlashMap<F>::PrintBuf(void) {
     size_t i = 0;
-    while (i < SECTOR_SIZE_BYTES) {
+    while (i < F::SECTOR_SIZE_BYTES) {
         for (size_t j = 0; j < 32; j++) {
             SOAR_PRINT("%02X ", buf[i++]);
         }
@@ -214,36 +207,11 @@ void FlashMap::PrintBuf(void) {
     }
 }
 
-constexpr size_t FlashMap::MapOffset(map_label_e map) {
+template <class F>
+constexpr size_t FlashMap<F>::MapOffset(MapLabel map) {
     return 1 + static_cast<size_t>(map) * NUM_SECTORS_PER_MAP;
 }
 
 static inline uint8_t *BufPut(uint8_t *buf, void *src, size_t n) {
     return (uint8_t *)memcpy(buf, src, n) + n;
-}
-
-static void MX66xxQSPI_ReadSector_Chunked(uint8_t *pBuffer, uint32_t Sector_Address, uint32_t OffsetInByte, uint32_t NumByteToRead) {
-    uint32_t num_chunks = NumByteToRead / 256;
-    uint32_t remaining = NumByteToRead % 256;
-
-    uint32_t i;
-    for (i = 0; i < num_chunks * 256; i += 256) {
-        MX66xxQSPI_ReadSector(pBuffer + i, Sector_Address + (i / SECTOR_SIZE_BYTES), i % SECTOR_SIZE_BYTES, 256);
-    }
-
-    MX66xxQSPI_ReadSector(pBuffer + i, Sector_Address + (i / SECTOR_SIZE_BYTES), i % SECTOR_SIZE_BYTES, remaining);
-}
-
-static void MX66xxQSPI_WriteSector_Chunked(uint8_t *pBuffer, uint32_t Sector_Address, uint32_t OffsetInByte, uint32_t NumByteToWrite) {
-    uint32_t num_chunks = NumByteToWrite / 256;
-    uint32_t remaining = NumByteToWrite % 256;
-
-    uint32_t i;
-    for (i = 0; i < num_chunks * 256; i += 256) {
-        MX66xxQSPI_WriteSector(pBuffer + i, Sector_Address + (i / SECTOR_SIZE_BYTES), i % SECTOR_SIZE_BYTES, 256);
-    }
-
-    if (remaining > 0) {
-        MX66xxQSPI_WriteSector(pBuffer + i, Sector_Address + (i / SECTOR_SIZE_BYTES), i % SECTOR_SIZE_BYTES, remaining);
-    }
 }

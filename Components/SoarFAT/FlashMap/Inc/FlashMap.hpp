@@ -19,7 +19,7 @@
 
 #include "BitArray.hpp"
 #include "CircularBuffer.hpp"
-#include "FlashStrategy.hpp"
+#include "Flash.hpp"
 
 #include <stdint.h>
 #include <atomic>
@@ -27,9 +27,6 @@
 /************************************
  * MACROS AND DEFINES
  ************************************/
-
-#define FLASH_CAPACITY_BYTES 134217728
-#define SECTOR_SIZE_BYTES    4096
 
 #define DIV_CEIL(x,y) (((x) + (y) - 1) / (y))
 
@@ -41,35 +38,36 @@
  * CLASS DEFINITIONS
  ************************************/
 
+template <class F>
 class FlashMap {
 private:
     /**
      * Two separate map sections are stored in the flash to aid with data
      * integrity.
      */
-    typedef enum mab_label_e : uint8_t {
-        MAP_A,
-        MAP_B,
-        NUM_MAPS,
-    } map_label_e;
+    enum class MapLabel: uint8_t {
+        MapA,
+        MapB,
+        NumMaps,
+    };
 
     /**
      * Indicates the operation performed on the flash chip for the purpose of
      * logging.
      */
-    typedef enum log_type_e : uint8_t {
-        LOG_WRITE,
-        LOG_ERASE,
-    } log_type_e;
+    enum class LogType : uint8_t {
+        LogWrite,
+        LogErase,
+    };
 
     /**
      * Each log entry consists of a type, 48 bits of metadata, and an 8 bit CRC.
      */
-    typedef struct log_entry_s {
-        log_type_e type;
+    struct LogEntry {
+        LogType type;
         uint8_t bytes[6];
         uint8_t crc;
-    } __attribute__((packed)) log_entry_s;
+    } __attribute__((packed));
 
     /**
      * Number stored in sector zero to verify if flash has been formatted.
@@ -80,7 +78,7 @@ private:
      * The real number of sectors on the flash device.
      */
     static constexpr size_t NUM_PHYSICAL_SECTORS =
-        FLASH_CAPACITY_BYTES / SECTOR_SIZE_BYTES;
+        F::CAPACITY_BYTES / F::SECTOR_SIZE_BYTES;
 
     /**
      * The total size of metadata stored per sector, in bits.
@@ -101,7 +99,7 @@ private:
      */
     static constexpr size_t NUM_SECTORS_PER_MAP = DIV_CEIL(
         NUM_PHYSICAL_SECTORS * CLASS_BITS_PER_SECTOR + 32,
-        SECTOR_SIZE_BYTES * 8);
+        F::SECTOR_SIZE_BYTES * 8);
 
     /**
      * The number of sectors to using for tracking changes made to the map
@@ -110,13 +108,13 @@ private:
      * sectors.
      */
     static constexpr size_t NUM_LOG_SECTORS = DIV_CEIL(
-        NUM_PHYSICAL_SECTORS, DIV_CEIL(SECTOR_SIZE_BYTES, sizeof(log_entry_s)));
+        NUM_PHYSICAL_SECTORS, DIV_CEIL(F::SECTOR_SIZE_BYTES, sizeof(LogEntry)));
 
     /**
      * The sector number of the first log sector.
      */
     static constexpr size_t LOG_SECTOR_OFFSET =
-        1 + NUM_SECTORS_PER_MAP * NUM_MAPS;
+        1 + NUM_SECTORS_PER_MAP * static_cast<uint8_t>(MapLabel::NumMaps);
 
     /**
      * The sector number of the first data sector.
@@ -176,7 +174,7 @@ private:
      * Indicates which copy of the map is currently being use. Swaps every time
      * the logs are commited to the map.
      */
-    map_label_e cur_map;
+    std::atomic<MapLabel> cur_map;
 
     /**
      * The next index in the log sectors where a log must be written.
@@ -184,24 +182,20 @@ private:
     std::atomic_uint16_t log_idx;
 
     /**
-     * The flash strategy to use.
+     * The flash device to use.
      */
-    FlashStrategy& strategy;
+    Flash<F::CAPACITY_BYTES, F::SECTOR_SIZE_BYTES>& dev;
 
     /**
      * Buffer used for sector reads/writes
      */
-    static uint8_t buf[SECTOR_SIZE_BYTES];
+    uint8_t buf[F::SECTOR_SIZE_BYTES];
 
     // Global variables
     bool initialized = false;
 
 public:
-    /**
-     * Returns the singleton instance of FlashMap. Must be stored as a 
-     * reference in the user-level code.
-     */
-    static FlashMap& Inst(void);
+    FlashMap(Flash<F::CAPACITY_BYTES, F::SECTOR_SIZE_BYTES>& dev) : dev(dev) { };
 
     /**
      * Initializes the flash chip. Must be called before anything else.
@@ -226,8 +220,6 @@ public:
      */
     void Erase(void);
 private:
-    FlashMap(void) { };
-
     /**
      * Finds a new random physical sector using the MurmurHash3 mixer finalizer.
      * See https://en.wikipedia.org/wiki/MurmurHash
@@ -238,7 +230,7 @@ private:
 
     int ReadMapDatum(size_t byte_offset, size_t datum_size_bytes, void *ret);
 
-    void WriteInitialMap(map_label_e map);
+    void WriteInitialMap(MapLabel map);
 
     void PrintBuf(void);
 
@@ -247,11 +239,13 @@ private:
      * The sector number will always be at least 1 because sector 0 is reserved
      * for static flash metadata.
      */
-    static constexpr size_t MapOffset(map_label_e map);
+    static constexpr size_t MapOffset(MapLabel map);
 };
 
 /************************************
  * FUNCTION DECLARATIONS
  ************************************/
+
+#include "FlashMap.ipp"
 
 #endif /* FLASH_MAP_HPP */

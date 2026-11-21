@@ -1,20 +1,20 @@
 /**
  ********************************************************************************
- * @file    FlashStrategyMX66XX.hpp
+ * @file    FlashMX66XX.hpp
  * @author  Jacob Plourde (Jacobplo)
  * @date    November 18, 2026
- * @brief   Flash strategy adapter for the existing MX66XX flash driver.
+ * @brief   Flash interface adapter for the existing MX66XX flash driver.
  ********************************************************************************
  */
 
-#ifndef FLASH_STRATEGY_MX66XX
-#define FLASH_STRATEGY_MX66XX
+#ifndef FLASH_MX66XX
+#define FLASH_MX66XX
 
 /************************************
  * INCLUDES
  ************************************/
 
-#include "FlashStrategy.hpp"
+#include "Flash.hpp"
 
 #include <stdint.h>
 
@@ -30,13 +30,13 @@
  * CLASS DEFINITIONS
  ************************************/
 
-class FlashStrategyMX66XX: public FlashStrategy {
+class FlashMX66XX: public Flash<128 * 1024 * 1024, 4096> {
 public:
     /**
      * Returns a singleton for the flash driver strategy because the base driver
      * is written without instancing.
      */
-    static FlashStrategyMX66XX& Inst(void);
+    static FlashMX66XX& Inst(void);
 
     int Init(void) override;
 
@@ -50,14 +50,14 @@ public:
 
     int EraseChip(void) override;
 
-    bool IsWriting(void) override;
+    bool IsBusy(void) override;
 
 private:
-    FlashStrategyMX66XX(void) { };
+    FlashMX66XX(void) { };
 };
 
 /************************************
  * FUNCTION DECLARATIONS
  ************************************/
 
-#endif /* FLASH_STRATEGY_MX66XX */
+#endif /* FLASH_MX66XX */

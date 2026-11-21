@@ -1,20 +1,21 @@
 /**
  ********************************************************************************
- * @file    FlashStrategy.hpp
+ * @file    Flash.hpp
  * @author  Jacob Plourde (Jacobplo)
  * @date    November 18, 2026
- * @brief   Defines an interface that flash methods must conform to so that they
- *          can be used with the FlashMap module.
+ * @brief   Defines an abstract class that flash chips drivers must conform to
+ *          so that they can be used with SoarFAT modules.
  ********************************************************************************
  */
 
-#ifndef FLASH_STRATEGY_H
-#define FLASH_STRATEGY_H
+#ifndef FLASH_H
+#define FLASH_H
 
 /************************************
  * INCLUDES
  ************************************/
 
+#include <cstddef>
 #include <stdint.h>
 
 /************************************
@@ -29,11 +30,15 @@
  * CLASS DEFINITIONS
  ************************************/
 
-class FlashStrategy {
+template <size_t CapacityBytes, size_t SectorSizeBytes>
+class Flash {
 public:
-    FlashStrategy() { };
+    static constexpr size_t CAPACITY_BYTES = CapacityBytes;
+    static constexpr size_t SECTOR_SIZE_BYTES = SectorSizeBytes;
 
-    virtual ~FlashStrategy() { };
+    Flash() { };
+
+    virtual ~Flash() { };
 
     /**
      * Initializes the flash chip.
@@ -85,11 +90,11 @@ public:
     /**
      * Checks if the flash chip is currently writing.
      */
-    virtual bool IsWriting(void) = 0;
+    virtual bool IsBusy(void) = 0;
 };
 
 /************************************
  * FUNCTION DECLARATIONS
  ************************************/
 
-#endif /* FLASH_STRATEGY_H */
+#endif /* FLASH_H */
