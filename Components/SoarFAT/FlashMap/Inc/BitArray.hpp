@@ -34,14 +34,15 @@
 template <size_t N>
 class BitArray {
 private:
-    std::atomic_uint32_t storage[(N + 31) / 32];
+    static constexpr size_t capacity = (N + 31) / 32;
+    std::atomic_uint32_t storage[capacity];
 
 public:
     /**
      * Zero-initializes all bits.
      */
     BitArray(void) {
-        for (size_t i = 0; i < ((N + 31) / 32); i++) {
+        for (size_t i = 0; i < capacity; i++) {
             storage[i] = 0;
         }
     }
@@ -68,7 +69,7 @@ public:
     }
 
     constexpr size_t BackingArraySize(void) {
-        return (N + 31) / 32;
+        return capacity;
     }
 };
 

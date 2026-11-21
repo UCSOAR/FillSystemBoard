@@ -56,9 +56,7 @@ int FlashMX66XX::Init(void)
 int FlashMX66XX::Write(const uint8_t *buf, uint32_t sector_address,
                                uint32_t byte_offset, uint32_t n)
 {
-    static int i = 0;
     MX66xxQSPI_WriteSector(const_cast<uint8_t *>(buf), sector_address, byte_offset, n);
-    SOAR_PRINT("%d\n", i++);
     return 0;
 }
 
