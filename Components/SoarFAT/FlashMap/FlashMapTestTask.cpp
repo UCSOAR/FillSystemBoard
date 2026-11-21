@@ -64,12 +64,14 @@ void FlashMapTestTask::InitTask()
  * @brief Instance Run loop for the Task, runs on scheduler start as long as the task is initialized.
  * @param pvParams RTOS Passed void parameters, contains a pointer to the object instance, should not be used
  */
+
 void FlashMapTestTask::Run(void * pvParams)
 {
     static FlashMX66XX& flash = FlashMX66XX::Inst();
-    FlashMap<FlashMX66XX> map(flash);
+    static FlashMap<FlashMX66XX> map(flash);
 
     map.Init();
+    //map.Format();
 
     while (1) {
         /* Process commands in blocking mode */

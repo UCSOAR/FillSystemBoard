@@ -65,7 +65,7 @@ void FlashMap<F>::Format(void) {
         return;
     }
 
-    Erase();
+    EraseChip();
 
     uint8_t num_maps = static_cast<uint8_t>(MapLabel::NumMaps);
 
@@ -95,7 +95,11 @@ void FlashMap<F>::Format(void) {
 
 template <class F>
 bool FlashMap<F>::IsValid(void) {
-    dev.Read(buf, 0, 0, F::SECTOR_SIZE_BYTES); 
+    for (size_t i = 0; i < 2 * NUM_SECTORS_PER_MAP + 1; i++) {
+        dev.Read(buf, i, 0, F::SECTOR_SIZE_BYTES); 
+        PrintBuf();
+    }
+    dev.Read(buf, 0, 0, F::SECTOR_SIZE_BYTES);
     PrintBuf();
 
     uint32_t read_magic_number = (buf[3] << 24) |
@@ -106,6 +110,8 @@ bool FlashMap<F>::IsValid(void) {
     uint8_t read_crc = buf[25];
     uint8_t calculated_crc = CRC8(buf, 25);
 
+    SOAR_PRINT("NUM_DATA_SECTORS_LOGICAL: %d\n", NUM_DATA_SECTORS_LOGICAL);
+    SOAR_PRINT("NUM_SECTORS_PER_MAP: %d\n", NUM_SECTORS_PER_MAP);
     SOAR_PRINT("Read CRC: %02X\n", read_crc);
     SOAR_PRINT("Caclculated CRC: %02X\n", calculated_crc);
 
@@ -117,10 +123,10 @@ bool FlashMap<F>::IsValid(void) {
 }
 
 template <class F>
-void FlashMap<F>::Erase(void) {
-    SOAR_PRINT("FlashMap::Erase() - Chip erase started\n");
+void FlashMap<F>::EraseChip(void) {
+    SOAR_PRINT("FlashMap::EraseChip() - Chip erase started\n");
     dev.EraseChip();
-    SOAR_PRINT("FlashMap::Erase() - Chip erase finished\n");
+    SOAR_PRINT("FlashMap::EraseChip() - Chip erase finished\n");
 }
 
 template <class F>
@@ -137,62 +143,62 @@ uint32_t FlashMap<F>::NewSector(void) {
 }
 
 template <class F>
-int FlashMap<F>::WriteMapDatum(size_t byte_offset, size_t datum_size_bytes, uint32_t datum) {
-    size_t total_bytes = NUM_SECTORS_PER_MAP * F::SECTOR_SIZE_BYTES;
-    if (byte_offset >= total_bytes) return -1;
-
-    size_t map_sector = byte_offset / F::SECTOR_SIZE_BYTES;
-    size_t map_offset = byte_offset % F::SECTOR_SIZE_BYTES;
-
-    dev.Write((uint8_t *)&datum, map_sector, map_offset, datum_size_bytes);
-
-    return 0;
-}
-
-template <class F>
-int FlashMap<F>::ReadMapDatum(size_t byte_offset, size_t datum_size_bytes, void *ret) {
-    size_t total_bytes = NUM_SECTORS_PER_MAP * F::SECTOR_SIZE_BYTES;
-    if (byte_offset >= total_bytes) return -1;
-
-    size_t map_sector = byte_offset / F::SECTOR_SIZE_BYTES;
-    size_t map_offset = byte_offset % F::SECTOR_SIZE_BYTES;
-
-    dev.Read((uint8_t *)ret, map_sector, map_offset, datum_size_bytes);
-
-    return 0;
-}
-
-template <class F>
 void FlashMap<F>::WriteInitialMap(MapLabel map) {
-    size_t map_offset = MapOffset(map);
+    size_t write_sector = MapOffset(map);
+
+    uint16_t u16;
+    uint32_t u32;
+    uint8_t *ptr = buf;
    
     // Write initial map sequence number
-    size_t cur_byte = map_offset;
-    WriteMapDatum(cur_byte, 4, static_cast<uint8_t>(map));
-    cur_byte += 4;
+    u32 = static_cast<uint32_t>(map);
+    ptr = BufPush(ptr, u32);
 
     // Write logical to physical sector mappings to 0.
+    u16 = 0;
     for (size_t i = 0; i < NUM_DATA_SECTORS_LOGICAL; i++) {
-        WriteMapDatum(cur_byte, 2, 0);
-        cur_byte += 2;
+        if (static_cast<size_t>(ptr - buf) >= F::SECTOR_SIZE_BYTES) { 
+            dev.Write(buf, write_sector++, 0, F::SECTOR_SIZE_BYTES);
+            ptr = buf;
+        }
+
+        ptr = BufPush(ptr, u16);
     }
 
     // Mark all data sectors free
+    u32 = 0xFFFFFFFF;
     for (size_t i = 0; i < is_free.BackingArraySize(); i++) {
-        WriteMapDatum(cur_byte, 4, 0xFFFFFFFF);
-        cur_byte += 4;
+        if (static_cast<size_t>(ptr - buf) >= F::SECTOR_SIZE_BYTES) {
+            dev.Write(buf, write_sector++, 0, F::SECTOR_SIZE_BYTES);
+            ptr = buf;
+        }
+
+        ptr = BufPush(ptr, u32);
     }
 
     // Mark data sectors not stale.
+    u32 = 0;
     for (size_t i = 0; i < is_stale.BackingArraySize(); i++) {
-        WriteMapDatum(cur_byte, 4, 0);
-        cur_byte += 4;
+        if (static_cast<size_t>(ptr - buf) >= F::SECTOR_SIZE_BYTES) {
+            dev.Write(buf, write_sector++, 0, F::SECTOR_SIZE_BYTES);
+            ptr = buf;
+        }
+
+        ptr = BufPush(ptr, u32);
     }
 
     // Write sector initial sector queue
-    for (size_t i = 0; i < NUM_DATA_SECTORS_PHYSICAL; i--) {
-        WriteMapDatum(cur_byte, 2, i);
-        cur_byte += 2;
+    for (u16 = 0; u16 < NUM_DATA_SECTORS_PHYSICAL; u16++) {
+        if (static_cast<size_t>(ptr - buf) >= F::SECTOR_SIZE_BYTES) {
+            dev.Write(buf, write_sector++, 0, F::SECTOR_SIZE_BYTES);
+            ptr = buf;
+        }
+
+        ptr = BufPush(ptr, u16);
+    }
+
+    if (ptr - buf > 0) {
+       dev.Write(buf, write_sector++, 0, F::SECTOR_SIZE_BYTES); 
     }
 }
 

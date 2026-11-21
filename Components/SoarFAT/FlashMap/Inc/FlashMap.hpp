@@ -53,11 +53,11 @@ private:
 
     /**
      * Indicates the operation performed on the flash chip for the purpose of
-     * logging.
+     * logging. Enum values are chosen to maximize Hamming distance.
      */
     enum class LogType : uint8_t {
-        LogWrite,
-        LogErase,
+        LogWrite = 0xA5,
+        LogErase = 0x5A,
     };
 
     /**
@@ -174,7 +174,7 @@ private:
      * Indicates which copy of the map is currently being use. Swaps every time
      * the logs are commited to the map.
      */
-    std::atomic<MapLabel> cur_map;
+    MapLabel cur_map;
 
     /**
      * The next index in the log sectors where a log must be written.
@@ -184,7 +184,7 @@ private:
     /**
      * The flash device to use.
      */
-    Flash<F::CAPACITY_BYTES, F::SECTOR_SIZE_BYTES>& dev;
+    F& dev;
 
     /**
      * Buffer used for sector reads/writes
@@ -195,7 +195,7 @@ private:
     bool initialized = false;
 
 public:
-    FlashMap(Flash<F::CAPACITY_BYTES, F::SECTOR_SIZE_BYTES>& dev) : dev(dev) { };
+    FlashMap(F& dev) : dev(dev) { };
 
     /**
      * Initializes the flash chip. Must be called before anything else.
@@ -218,17 +218,13 @@ public:
     /**
      * Erases the flash chip.
      */
-    void Erase(void);
+    void EraseChip(void);
 private:
     /**
      * Finds a new random physical sector using the MurmurHash3 mixer finalizer.
      * See https://en.wikipedia.org/wiki/MurmurHash
      */
     uint32_t NewSector(void);
-
-    int WriteMapDatum(size_t byte_offset, size_t datum_size_bytes, uint32_t datum);
-
-    int ReadMapDatum(size_t byte_offset, size_t datum_size_bytes, void *ret);
 
     void WriteInitialMap(MapLabel map);
 
