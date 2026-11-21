@@ -168,7 +168,7 @@ private:
      * a physical sector to write to.
      * Indexed by physical sector.
      */
-    CircularBuffer<std::atomic_uint16_t, NUM_DATA_SECTORS_PHYSICAL> sector_seq;
+    CircularBuffer<uint16_t, NUM_DATA_SECTORS_PHYSICAL> sector_seq;
 
     /**
      * Indicates which copy of the map is currently being use. Swaps every time
@@ -226,7 +226,17 @@ private:
      */
     uint32_t NewSector(void);
 
+    /**
+     * Function called when formatting to populate the initial mapping metadata
+     * on flash.
+     */
     void WriteInitialMap(MapLabel map);
+
+    /**
+     * Function called on initialization to load the current map metadata from
+     * flash into RAM.
+     */
+    void LoadMap(void);
 
     void PrintBuf(void);
 

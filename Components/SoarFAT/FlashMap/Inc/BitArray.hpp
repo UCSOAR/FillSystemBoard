@@ -71,6 +71,14 @@ public:
     constexpr size_t BackingArraySize(void) {
         return capacity;
     }
+
+    void BackingArraySetByte(size_t idx, uint32_t byte) {
+        storage[idx].store(byte); 
+    }
+
+    uint32_t BackingArrayGetByte(size_t idx) {
+        return storage[idx].load(); 
+    }
 };
 
 /************************************
