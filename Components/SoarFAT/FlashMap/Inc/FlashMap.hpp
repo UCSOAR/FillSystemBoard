@@ -22,7 +22,6 @@
 #include "Flash.hpp"
 
 #include <stdint.h>
-#include <atomic>
 
 /************************************
  * MACROS AND DEFINES
@@ -147,7 +146,7 @@ private:
      * currently no association.
      * Indexed by logical sector.
      */
-    std::atomic_uint16_t physical_sector[NUM_DATA_SECTORS_LOGICAL];
+    uint16_t physical_sector[NUM_DATA_SECTORS_LOGICAL];
 
     /**
      * Flag that marks whether a physical sector is currently referenced by a
@@ -179,7 +178,7 @@ private:
     /**
      * The next index in the log sectors where a log must be written.
      */
-    std::atomic_uint16_t log_idx;
+    uint16_t log_idx;
 
     /**
      * The flash device to use.

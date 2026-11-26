@@ -16,7 +16,7 @@
  * INCLUDES
  ************************************/
 
-#include <atomic>
+#include <stdint.h>
 #include <stddef.h>
 
 /************************************
@@ -35,7 +35,7 @@ template <size_t N>
 class BitArray {
 private:
     static constexpr size_t capacity = (N + 31) / 32;
-    std::atomic_uint32_t storage[capacity];
+    uint32_t storage[capacity];
 
 public:
     /**
@@ -51,33 +51,33 @@ public:
      * Atomically sets the nth bit.
      */
     void Set(size_t n) {
-        storage[n / 32].fetch_or(0b1U << (n % 32), std::memory_order_relaxed);
+        storage[n / 32] |= (0b1U << (n % 32));
     }
 
     /**
      * Atomically resets the nth bit.
      */
     void Reset(size_t n) {
-        storage[n / 32].fetch_and(~(0b1U << (n % 32)), std::memory_order_relaxed);
+        storage[n / 32] &= ~(0b1U << (n % 32));
     }
 
     /**
      * Returns the nth bit.
      */
-    uint32_t operator[] (size_t i) const {
-        return (uint32_t)storage[i / 32] & (0b1U << (i % 32));
+    uint32_t Get(size_t i) const {
+        return (storage[i / 32] >> (i % 32)) & 0b1U;
     }
 
-    constexpr size_t BackingArraySize(void) {
+    constexpr size_t BackingArraySize(void) const {
         return capacity;
     }
 
     void BackingArraySetByte(size_t idx, uint32_t byte) {
-        storage[idx].store(byte); 
+        storage[idx] = byte; 
     }
 
-    uint32_t BackingArrayGetByte(size_t idx) {
-        return storage[idx].load(); 
+    uint32_t BackingArrayGetByte(size_t idx) const {
+        return storage[idx]; 
     }
 };
 
